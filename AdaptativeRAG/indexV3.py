@@ -283,7 +283,7 @@ def generate(state):
 
     # RAG generation
     generation = rag_chain.invoke({"context": documents, "question": question,"history":history})
-    return {"documents": documents, "question": [HumanMessage(content=f"{question}")], "generation": generation, "messages":[HumanMessage(content=f"{question}"),generation]}
+    return {"documents": documents, "question": [HumanMessage(content=f"{question}")], "generation": generation, "messages":[HumanMessage(content=f"{question}"),AIMessage(content=f"{generation}")]}
 
 def grade_documents(state):
     """
@@ -510,17 +510,20 @@ from pprint import pprint
 config = {"configurable": {"thread_id": "2"}}
 input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
 
-# for output in app.stream({"question": [input_message]}, config, stream_mode="values"):
-#     for key, value in output.items():
-#         # Node
-#         pprint(f"Node '{key}':")
-#         # Optional: print full state at each node
-#         # pprint.pprint(value["keys"], indent=2, width=80, depth=None)
-#     pprint("\n---\n")
+
 
 # # Final generation
 # pprint(value["generation"])
 
 answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
-pprint(answer["generation"])
+# pprint(answer["generation"])
+pprint(answer["messages"])
+
+# def getAnswer(question,thread_id):
+#     config = {"configurable": {"thread_id": thread_id}}
+#     input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
+
+
+#     answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
+#     pprint(answer["generation"])
 
