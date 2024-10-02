@@ -503,27 +503,35 @@ memory = MemorySaver()
 # Compile
 app = workflow.compile(checkpointer=memory)
 
-from pprint import pprint
+# from pprint import pprint
 
 # Run
 
-config = {"configurable": {"thread_id": "2"}}
-input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
+# config = {"configurable": {"thread_id": "2"}}
+# input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
 
 
 
 # # Final generation
 # pprint(value["generation"])
 
-answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
+# answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
 # pprint(answer["generation"])
-pprint(answer["messages"])
+# print(answer["messages"][-1].content)
 
-# def getAnswer(question,thread_id):
-#     config = {"configurable": {"thread_id": thread_id}}
-#     input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
+def getAIAnswer(question,thread_id):
+    config = {"configurable": {"thread_id": thread_id}}
+    input_message = HumanMessage(content=question)
 
 
-#     answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
-#     pprint(answer["generation"])
+    AIanswer = app.invoke({"question": [input_message]}, config, stream_mode="values")
+    AIanswerContent = AIanswer["messages"][-1].content
+    
+    return AIanswerContent
+
+userQuestion = "What player at the Bears expected to draft first in the 2024 NFL draft?"
+userID = "2"
+
+print(getAIAnswer(userQuestion,userID))
+    
 
