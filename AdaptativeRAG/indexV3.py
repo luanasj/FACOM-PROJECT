@@ -507,18 +507,6 @@ app = workflow.compile(checkpointer=memory)
 
 # Run
 
-# config = {"configurable": {"thread_id": "2"}}
-# input_message = HumanMessage(content="What player at the Bears expected to draft first in the 2024 NFL draft?")
-
-
-
-# # Final generation
-# pprint(value["generation"])
-
-# answer = app.invoke({"question": [input_message]}, config, stream_mode="values")
-# pprint(answer["generation"])
-# print(answer["messages"][-1].content)
-
 def getAIAnswer(question,thread_id):
     config = {"configurable": {"thread_id": thread_id}}
     input_message = HumanMessage(content=question)
@@ -529,9 +517,27 @@ def getAIAnswer(question,thread_id):
     
     return AIanswerContent
 
-userQuestion = "What player at the Bears expected to draft first in the 2024 NFL draft?"
-userID = "2"
+systemActive = True
 
-print(getAIAnswer(userQuestion,userID))
-    
+def systemActivation():
+    global systemActive
+    systemActive = not systemActive
+
+def callMessages():
+    global systemActive
+    while systemActive:
+        userQuestion = input("Digite uma pergunta: ")
+        userID= input("id: ")
+
+        print(f"resposta: {getAIAnswer(userQuestion,userID)}")
+
+        keepActive = input("Do you want to keep the System Active?(y/n): ")
+        if keepActive == "n": 
+            systemActivation()
+
+
+callMessages()
+
+
+
 
