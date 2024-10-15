@@ -50,7 +50,44 @@ from langchain_groq import ChatGroq
 
 from pydantic import BaseModel, Field
 
+## Route Query
 
+class rag_or_generate(BaseModel):
+    """
+    Invokes the agent model to generate a response based on the current state. Given
+    the question, it will decide to route retrieve using the retriever tool, or simply generate.
+
+    """
+
+    method: Literal["generate","retrieve"] = Field(
+        ...,
+        description="Given a user question choose to send it to generate or retrieve.",
+    )
+
+# LLM with function call
+llm = ChatGroq(model="llama3-8b-8192",temperature=0)
+structured_llm_decision_maker = llm.with_structured_output(rag_or_generate)
+
+# Prompt
+
+system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
+    To retrieve is needed for questions about FACOM(Faculdade de Comunicação UFBA), college/university, 
+    enrolment, grades. Otherwise call generate.
+""" 
+# system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
+#      To retrieve is needed for questions which need context to be answered. 
+#      To generate is needed to simple direct questions.
+#  """ 
+
+
+agent_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system),
+        ("user", "{question}"),
+    ]
+)
+
+agent_router = agent_prompt | structured_llm_decision_maker
 
 # Data model
 class RouteQuery(BaseModel):
@@ -361,7 +398,6 @@ def web_search(state):
 
 
 
-
 def route_question(state):
     """
     Route question to web search or RAG.
@@ -376,13 +412,30 @@ def route_question(state):
     print("---ROUTE QUESTION---")
     question = state["question"][-1]
     question = question.content
-    source = question_router.invoke({"question": question})
-    if source.datasource == "web_search":
-        print("---ROUTE QUESTION TO WEB SEARCH---")
-        return "web_search"
-    elif source.datasource == "vectorstore":
-        print("---ROUTE QUESTION TO RAG---")
-        return "vectorstore"
+    # source = question_router.invoke({"question": question})
+    try:
+        decision =  agent_router.invoke({"question": question})
+    except Exception:
+        decision = AIMessage(content='content',method='generate')
+    if decision.method == "generate":
+        print("---ROUTE QUESTION TO GENERATE---")
+        return "generate"
+    elif decision.method == "retrieve":
+        source = question_router.invoke({"question": question})
+        if source.datasource == "web_search":
+            print("---ROUTE QUESTION TO WEB SEARCH---")
+            return "web_search"
+        elif source.datasource == "vectorstore":
+            print("---ROUTE QUESTION TO RAG---")
+            return "vectorstore"
+
+
+    # if source.datasource == "web_search":
+    #     print("---ROUTE QUESTION TO WEB SEARCH---")
+    #     return "web_search"
+    # elif source.datasource == "vectorstore":
+    #     print("---ROUTE QUESTION TO RAG---")
+    #     return "vectorstore"
 
 
 def decide_to_generate(state):
@@ -452,6 +505,7 @@ def grade_generation_v_documents_and_question(state):
         print("---DECISION: GENERATION IS NOT GROUNDED IN DOCUMENTS, RE-TRY---")
         return "not supported"
 
+
 from langgraph.graph import END, StateGraph, START
 
 workflow = StateGraph(GraphState)
@@ -462,16 +516,37 @@ workflow.add_node("retrieve", retrieve)  # retrieve
 workflow.add_node("grade_documents", grade_documents)  # grade documents
 workflow.add_node("generate", generate)  # generatae
 workflow.add_node("transform_query", transform_query)  # transform_query
+# workflow.add_node("route_question", route_question) # route to rag or retrieve
 
 # Build graph
+
 workflow.add_conditional_edges(
     START,
     route_question,
     {
+        "generate":"generate",
         "web_search": "web_search",
         "vectorstore": "retrieve",
     },
 )
+
+# workflow.add_conditional_edges(
+#     START,
+#     route_to_rag,
+#     {
+#         "generate":"generate",
+#         "retrieve":"route_question",
+#     },
+# )
+
+# workflow.add_conditional_edges(
+#     "route_question",
+#     route_question,
+#     {
+#         "web_search": "web_search",
+#         "vectorstore": "retrieve",
+#     },
+# )
 workflow.add_edge("web_search", "generate")
 workflow.add_edge("retrieve", "grade_documents")
 workflow.add_conditional_edges(
@@ -502,6 +577,7 @@ memory = MemorySaver()
 
 # Compile
 app = workflow.compile(checkpointer=memory)
+
 
 # from pprint import pprint
 
