@@ -71,9 +71,9 @@ structured_llm_decision_maker = llm.with_structured_output(rag_or_generate)
 # Prompt
 
 system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
-    To retrieve is needed for questions about FACOM(Faculdade de Comunicação UFBA), college/university, 
-    enrolment, grades. Otherwise call generate.
-""" 
+   To retrieve is needed for questions about FACOM(Faculdade de Comunicação UFBA), about college/university, 
+   enrolment, grades. Otherwise call generate.
+ """ 
 # system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
 #      To retrieve is needed for questions which need context to be answered. 
 #      To generate is needed to simple direct questions.
@@ -412,7 +412,7 @@ def route_question(state):
     print("---ROUTE QUESTION---")
     question = state["question"][-1]
     question = question.content
-    # source = question_router.invoke({"question": question})
+    source = question_router.invoke({"question": question})
     try:
         decision =  agent_router.invoke({"question": question})
     except Exception:
@@ -429,7 +429,7 @@ def route_question(state):
             print("---ROUTE QUESTION TO RAG---")
             return "vectorstore"
 
-
+    # source = question_router.invoke({"question": question})
     # if source.datasource == "web_search":
     #     print("---ROUTE QUESTION TO WEB SEARCH---")
     #     return "web_search"
@@ -532,21 +532,14 @@ workflow.add_conditional_edges(
 
 # workflow.add_conditional_edges(
 #     START,
-#     route_to_rag,
-#     {
-#         "generate":"generate",
-#         "retrieve":"route_question",
-#     },
-# )
-
-# workflow.add_conditional_edges(
-#     "route_question",
 #     route_question,
 #     {
 #         "web_search": "web_search",
 #         "vectorstore": "retrieve",
 #     },
 # )
+
+
 workflow.add_edge("web_search", "generate")
 workflow.add_edge("retrieve", "grade_documents")
 workflow.add_conditional_edges(
