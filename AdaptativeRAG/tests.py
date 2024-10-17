@@ -1,97 +1,48 @@
 from dotenv import load_dotenv
 load_dotenv()
+#generation prompt "luanasjdev/rag-prompt-with-chat-history"
 
-from typing import Literal
+###RETRIEVER
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import AIMessage
+from dotenv import load_dotenv
+load_dotenv()
 
-from langchain_groq import ChatGroq
+### Build Index
 
-from pydantic import BaseModel, Field
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.vectorstores import Chroma
+# from langchain_openai import OpenAIEmbeddings
 
-# Data model
-class rag_or_generate(BaseModel):
-    """
-    Invokes the agent model to generate a response based on the current state. Given
-    the question, it will decide to route retrieve using the retriever tool, or simply generate.
+from langchain_cohere import CohereEmbeddings
 
-    """
+# Set embeddings
+embd = CohereEmbeddings(model='embed-english-v3.0')
 
-    method: Literal["generate","retrieve"] = Field(
-        ...,
-        description="Given a user question choose to send it to generate or retrieve.",
-    )
+# Docs to index
+urls = [
+    "https://lilianweng.github.io/posts/2023-06-23-agent/",
+    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
+    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
+]
 
-# LLM with function call
-llm = ChatGroq(model="llama3-8b-8192",temperature=0)
-structured_llm_decision_maker = llm.with_structured_output(rag_or_generate)
+# Load
+docs = [WebBaseLoader(url).load() for url in urls]
+docs_list = [item for sublist in docs for item in sublist]
 
-# Prompt
-
-
-
-system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
-   To retrieve is needed for questions about FACOM(Faculdade de Comunicação UFBA), about college/university, 
-   enrolment, grades. Otherwise call generate.
- """ 
-
-agent_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", system),
-        ("user", "{question}"),
-    ]
+# Split
+text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+    chunk_size=500, chunk_overlap=0
 )
+doc_splits = text_splitter.split_documents(docs_list)
 
-agent_router = agent_prompt | structured_llm_decision_maker
-
-
-def callQuestion(question):
-    try:
-        return agent_router.invoke({"question": question})
-    except Exception:
-        return AIMessage(content='content',method='generate')
-
-
-
-question = input("Make your question: ")
-
-while (question != "end"):
-    print(callQuestion(question))
-#     print(agent_router.invoke({"question": question}))
-    question = input("Make your question: ")
-
-
-
-
-
-
-##rag_or_generate router
-
-# def route_to_rag(state):
-#     """
-#     Given a question, it will decide retrieve using the retrieving tools,
-#     or simply generate an answer.
-
-#     Args:
-#         state (question): user question
-
-#     Returns:
-#         str: Next node to call
-#     """
-#     print("---ROUTE QUESTION---")
-#     question = state["question"]
-#     try:
-#         source =  agent_router.invoke({"question": question})
-#     except Exception:
-#         source = AIMessage(content='content',method='generate')
-
-#     if source.method == "generate":
-#         print("---ROUTE QUESTION TO GENERATE---")
-#         return "generate"
-#     elif source.method == "retrieve":
-#         print("---ROUTE QUESTION TO RETRIEVE---")
-#         return "retrieve"
+# Add to vectorstore
+vectorstore = Chroma.from_documents(
+    documents=doc_splits,
+    collection_name="rag-chroma",
+    embedding=embd,
+)
+retriever = vectorstore.as_retriever()
 
 
 
