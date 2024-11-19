@@ -25,12 +25,15 @@ def baixar_pdf(url, pasta_destino, nome_arquivo):
 
 # PDFs to index
 
-pdflinks = [{"link":f"https://facom.ufba.br/portal/conteudo/files/EDITAL%20PROEXT%202024.pdf","title":"pdf1.pdf"},{"link":f"https://facom.ufba.br/portal/conteudo/files/Guia%20do%20semestre%20para%20estudantes%20da%20FACOM%202024-2.pdf","title":"pdf2.pdf"}]
+pdflinks = [{"link":f"https://facom.ufba.br/portal/conteudo/files/EDITAL%20PROEXT%202024.pdf","title":"pdf1"},{"link":f"https://facom.ufba.br/portal/conteudo/files/Guia%20do%20semestre%20para%20estudantes%20da%20FACOM%202024-2.pdf","title":"pdf2"}]
 
 pasta_destino_pdfs = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp'
+#pdf_paths = []
+
 
 for item in pdflinks:
-    baixar_pdf(item["link"], pasta_destino_pdfs, item["title"])
+    baixar_pdf(item["link"], pasta_destino_pdfs, item["title"]+".pdf")
+#    pdf_paths.append("../temp/" + item["title"] +  ".pdf")
 
 
 # Web pages to index
@@ -41,28 +44,47 @@ urls = [
 ]
 
 ### Build Index
-
+import bs4
+from langchain import hub
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import Chroma
+
+from langchain_groq import ChatGroq
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+
 # from langchain_openai import OpenAIEmbeddings
 
 from langchain_cohere import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
+
+
+llm = ChatGroq(model="llama3-8b-8192")
 
 # Set embeddings
 embd = CohereEmbeddings(model='embed-english-v3.0')
 
 
 #docs
-docs = [WebBaseLoader(url).load() for url in urls] + [PyPDFLoader(f"../temp/{pdf}.pdf").load() for pdf in pdflinks["title"]]
+# Defina o filtro para incluir apenas a parte específica da página 
+bs4_strainer = bs4.SoupStrainer(class_="pagina-interna")
+
+
+# Carregar documentos da web 
+docs = [] 
+for url in urls: 
+    loader = WebBaseLoader(web_paths=(url,), bs_kwargs=dict(parse_only=bs4_strainer)) 
+    loader.requests_kwargs = {'verify': False} 
+    docs.extend(loader.load())
+docs += [PyPDFLoader("../temp/" + pdf["title"] +  ".pdf").load() for pdf in pdflinks]
 
 # Load
 docs_list = [item for sublist in docs for item in sublist]
 
 # Split
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=500, chunk_overlap=0
+    chunk_size=300, chunk_overlap=20
 )
 doc_splits = text_splitter.split_documents(docs_list)
 
@@ -75,7 +97,20 @@ vectorstore = Chroma.from_documents(
 retriever = vectorstore.as_retriever()
 
 
+prompt = hub.pull("rlm/rag-prompt")
 
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+
+rag_chain = prompt | llm | StrOutputParser()
+
+
+# Run
+question = "O departamento de comunicacao abriu inscricao para monitores?"
+generation = rag_chain.invoke({"context": docs, "question": question})
+print(generation)
 
 
 
@@ -119,7 +154,6 @@ retriever = vectorstore.as_retriever()
 # ]
 
 # #PDF to index
-
 
 # #docs
 # docs = [WebBaseLoader(url).load() for url in urls]
