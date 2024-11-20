@@ -77,16 +77,18 @@ for url in urls:
     loader = WebBaseLoader(web_paths=(url,), bs_kwargs=dict(parse_only=bs4_strainer)) 
     loader.requests_kwargs = {'verify': False} 
     docs.extend(loader.load())
-docs += [PyPDFLoader("../temp/" + pdf["title"] +  ".pdf").load() for pdf in pdflinks]
 
-# Load
-docs_list = [item for sublist in docs for item in sublist]
+# Carregar documentos PDF 
+for pdf in pdflinks: 
+    loader = PyPDFLoader(os.path.join(pasta_destino_pdfs, pdf["title"] + ".pdf")) 
+    docs.extend(loader.load())
+
 
 # Split
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
     chunk_size=300, chunk_overlap=20
 )
-doc_splits = text_splitter.split_documents(docs_list)
+doc_splits = text_splitter.split_documents(docs)
 
 # Add to vectorstore
 vectorstore = Chroma.from_documents(
@@ -99,17 +101,20 @@ retriever = vectorstore.as_retriever()
 
 prompt = hub.pull("rlm/rag-prompt")
 
+question = "O departamento de comunicacao abriu inscricao para monitores?"
 
-def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
+
+# def format_docs(docs):
+#     return "\n\n".join(doc.page_content for doc in docs)
+
+context = retriever.invoke(question)
 
 
 rag_chain = prompt | llm | StrOutputParser()
 
 
 # Run
-question = "O departamento de comunicacao abriu inscricao para monitores?"
-generation = rag_chain.invoke({"context": docs, "question": question})
+generation = rag_chain.invoke({"context": context, "question": question})
 print(generation)
 
 
