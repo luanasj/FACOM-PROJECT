@@ -1,37 +1,94 @@
 from dotenv import load_dotenv
 load_dotenv()
-#generation prompt "luanasjdev/rag-prompt-with-chat-history"
+# #generation prompt "luanasjdev/rag-prompt-with-chat-history"
 
-###RETRIEVER
+import requests
+import os
+
+### Download pdfs
+def baixar_pdf(url, pasta_destino, nome_arquivo):
+    # Verifica se a pasta de destino existe, se não, cria a pasta
+    if not os.path.exists(pasta_destino):
+        os.makedirs(pasta_destino)
+    
+    # Faz o download do PDF
+    resposta = requests.get(url, verify=False)
+    
+    # Caminho completo do arquivo
+    caminho_arquivo = os.path.join(pasta_destino, f"{nome_arquivo}")
+    
+    # Salva o PDF na pasta de destino
+    with open(caminho_arquivo, 'wb') as pdf_file:
+        pdf_file.write(resposta.content)
+    
+    print(f"PDF salvo em: {caminho_arquivo}")
+
+# PDFs to index
+
+pdflinks = [{"link":f"https://facom.ufba.br/portal/conteudo/files/EDITAL%20PROEXT%202024.pdf","title":"pdf1"},{"link":f"https://facom.ufba.br/portal/conteudo/files/Guia%20do%20semestre%20para%20estudantes%20da%20FACOM%202024-2.pdf","title":"pdf2"}]
+
+pasta_destino_pdfs = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp'
+#pdf_paths = []
+
+
+for item in pdflinks:
+    baixar_pdf(item["link"], pasta_destino_pdfs, item["title"]+".pdf")
+#    pdf_paths.append("../temp/" + item["title"] +  ".pdf")
+
+
+# Web pages to index
+urls = [
+    "https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba",
+    "https://facom.ufba.br/portal/informes/783/facom-recebe-novos-estudantes-com-programacao-de-acolhimento-",
+    "https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores",
+]
 
 ### Build Index
-
+import bs4
+from langchain import hub
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import Chroma
+
+from langchain_groq import ChatGroq
+from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnablePassthrough
+
 # from langchain_openai import OpenAIEmbeddings
 
 from langchain_cohere import CohereEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+
+
+llm = ChatGroq(model="llama3-8b-8192")
 
 # Set embeddings
 embd = CohereEmbeddings(model='embed-english-v3.0')
 
-# Docs to index
-urls = [
-    "https://lilianweng.github.io/posts/2023-06-23-agent/",
-    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
-]
 
-# Load
-docs = [WebBaseLoader(url).load() for url in urls]
-docs_list = [item for sublist in docs for item in sublist]
+#docs
+# Defina o filtro para incluir apenas a parte específica da página 
+bs4_strainer = bs4.SoupStrainer(class_="pagina-interna")
+
+
+# Carregar documentos da web 
+docs = [] 
+for url in urls: 
+    loader = WebBaseLoader(web_paths=(url,), bs_kwargs=dict(parse_only=bs4_strainer)) 
+    loader.requests_kwargs = {'verify': False} 
+    docs.extend(loader.load())
+
+# Carregar documentos PDF 
+for pdf in pdflinks: 
+    loader = PyPDFLoader(os.path.join(pasta_destino_pdfs, pdf["title"] + ".pdf")) 
+    docs.extend(loader.load())
+
 
 # Split
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=500, chunk_overlap=0
+    chunk_size=300, chunk_overlap=20
 )
-doc_splits = text_splitter.split_documents(docs_list)
+doc_splits = text_splitter.split_documents(docs)
 
 # Add to vectorstore
 vectorstore = Chroma.from_documents(
