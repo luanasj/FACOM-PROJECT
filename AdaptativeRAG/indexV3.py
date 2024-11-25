@@ -206,22 +206,35 @@ retrieval_grader = grade_prompt | structured_llm_grader
 ### Generate
 
 from langchain import hub
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 
+
+#RAG generate
 # Prompt
-prompt = hub.pull("luanasjdev/rag-prompt-with-chat-history")
-
-# LLM
-# llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
-
-
-# Post-processing
-# def format_docs(docs):
-#     return "\n\n".join(doc.page_content for doc in docs)
+rag_prompt = hub.pull("luanasjdev/rag-prompt-with-chat-history")
 
 
 # Chain
-rag_chain = prompt | llm | StrOutputParser()
+rag_chain = rag_prompt | llm | StrOutputParser()
+
+
+#NoRAG Generation
+
+no_rag_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Você é um assistente preparado para responder informacoes sobre a FACOM (Faculdade de Comunicação) da UFBA.",
+        ),
+        MessagesPlaceholder(variable_name="messages"),
+    ]
+)
+
+# Chain
+no_rag_chain = no_rag_prompt | llm | StrOutputParser()
+
+
 
 ### Hallucination Grader
 
@@ -378,6 +391,29 @@ def generate(state):
     # RAG generation
     generation = rag_chain.invoke({"context": documents, "question": question,"history":history})
     return {"documents": documents, "question": [HumanMessage(content=f"{question}")], "generation": generation, "messages":[HumanMessage(content=f"{question}"),AIMessage(content=f"{generation}")]}
+
+def generate_without_rag(state):
+    """
+    Generate answer
+
+    Args:
+        state (dict): The current graph state
+
+    Returns:
+        state (dict): New key added to state, generation, that contains LLM generation
+    """
+    print("---GENERATE---")
+    question = state["question"][-1]
+    documents = ""
+    history = state["messages"][:5]
+    
+    
+
+    # RAG generation
+    generation = no_rag_chain.invoke({"messages": history+[question]})
+    return {"documents": documents, "question": [HumanMessage(content=f"{question}")], "generation": generation, "messages":[HumanMessage(content=f"{question}"),AIMessage(content=f"{generation}")]}
+
+
 
 def grade_documents(state):
     """
@@ -573,7 +609,7 @@ workflow.add_node("retrieve", retrieve)  # retrieve
 workflow.add_node("grade_documents", grade_documents)  # grade documents
 workflow.add_node("generate", generate)  # generatae
 workflow.add_node("transform_query", transform_query)  # transform_query
-# workflow.add_node("route_question", route_question) # route to rag or retrieve
+workflow.add_node("generate_without_rag", generate_without_rag) # route to rag or retrieve
 
 # Build graph
 
@@ -581,7 +617,7 @@ workflow.add_conditional_edges(
     START,
     route_question,
     {
-        "generate":"generate",
+        "generate":"generate_without_rag",
         "web_search": "web_search",
         "vectorstore": "retrieve",
     },
@@ -596,7 +632,7 @@ workflow.add_conditional_edges(
 #     },
 # )
 
-
+workflow.add_edge("generate_without_rag",END)
 workflow.add_edge("web_search", "generate")
 workflow.add_edge("retrieve", "grade_documents")
 workflow.add_conditional_edges(
