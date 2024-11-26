@@ -43,7 +43,7 @@ for item in pdflinks:
 #     "https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores",
 # ]
 
-urls = [{"link":"https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba","description":"resultado para a selecao de estagio remunerado;"},{"link":"https://facom.ufba.br/portal/pagina/47/","description":"orientações sobre estágio,atividades complementares,atestado,trancamento, salvador card e inscrições em componentes de outros cursos;"},{"link":"https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores", "description":"incricoes para selecao de monitores"}]
+urls = [{"link":"https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba","description":"resultado para a selecao de estagio remunerado;"},{"link":"https://facom.ufba.br/portal/pagina/47/","description":"orientações sobre estágio,atividades complementares,atestado medico (abono de falta),trancamento de disciplinas, salvador card e inscrição em componentes de outros cursos;"},{"link":"https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores", "description":"incricoes para selecao de monitores"}]
 
 ### Build Index
 import bs4
@@ -62,7 +62,7 @@ from langchain_cohere import CohereEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 
 
-llm = ChatGroq(model="llama3-8b-8192")
+llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 
 # Set embeddings
 embd = CohereEmbeddings(model='embed-english-v3.0')
@@ -106,7 +106,7 @@ retriever = vectorstore.as_retriever()
 from typing import Literal
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_groq import ChatGroq
+# from langchain_groq import ChatGroq
 
 from pydantic import BaseModel, Field
 
@@ -125,18 +125,22 @@ class rag_or_generate(BaseModel):
     )
 
 # LLM with function call
-llm = ChatGroq(model="llama3-8b-8192",temperature=0)
+# llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 structured_llm_decision_maker = llm.with_structured_output(rag_or_generate)
 
 # Prompt
 
-system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
-   To retrieve is needed for questions about FACOM(Faculdade de Comunicação UFBA), about college/university, 
-   enrolment, grades. Otherwise call generate.
- """ 
+system = """You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message.
+
+If the question is related to FACOM (Faculdade de Comunicação UFBA), including topics such as college/university, enrollment, grades, or any other university-related context, you should retrieve the information from the database.
+
+For all other questions, you should generate an answer without additional context.
+
+Your goal is to provide accurate and relevant responses based on the user's query.
+""" 
 # system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
-#      To retrieve is needed for questions which need context to be answered. 
-#      To generate is needed to simple direct questions.
+#   To retrieve is needed for questions related to FACOM(Faculdade de Comunicação UFBA), about college/university, 
+#   enrolment, grades. Otherwise call generate.
 #  """ 
 
 
@@ -160,7 +164,7 @@ class RouteQuery(BaseModel):
 
 
 # LLM with function call
-llm = ChatGroq(model="llama3-8b-8192",temperature=0)
+# llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 structured_llm_router = llm.with_structured_output(RouteQuery)
 
 #VectorStore content description
@@ -172,9 +176,21 @@ for url in urls:
 
 
 # Prompt
-system = f"""You are an expert at routing a user question to a vectorstore or web search.
-The vectorstore contains documents related to {vectorstoreContent}.
-Use the vectorstore for questions on these topics. Otherwise, use web-search."""
+system = f"""You are an expert at determining whether to retrieve information from a vectorstore or perform a web search based on a user's question.
+
+The vectorstore contains documents related to the following topics:
+{vectorstoreContent}.
+
+Use the vectorstore for questions on these topics.
+
+For all other questions, including those not explicitly mentioned or when the information is not found in the vectorstore, use web search.
+
+Your goal is to provide accurate and relevant responses based on the user's query."""
+
+# system = f"""You are an expert at routing a user question to a vectorstore or web search.
+# The vectorstore contains documents related to {vectorstoreContent}.
+# Use the vectorstore for questions on these topics. Otherwise, use web-search."""
+
 route_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system),
@@ -336,7 +352,8 @@ web_search_tool = TavilySearchResults(
     include_answer=True,
     include_raw_content=True,
     include_images=True,
-    include_domains=["facom.ufba.br","portal.ufba.br","supac.ufba.br","supac.ufba.br"],
+    include_domains=["facom.ufba.br"]
+    # include_domains=["facom.ufba.br","portal.ufba.br","supac.ufba.br","supac.ufba.br"],
     # exclude_domains=[...],
     # name="...",            # overwrite default tool name
     # description="...",     # overwrite default tool description
@@ -668,15 +685,17 @@ workflow.add_conditional_edges(
     },
 )
 workflow.add_edge("transform_query", "retrieve")
-workflow.add_conditional_edges(
-    "generate",
-    grade_generation_v_documents_and_question,
-    {
-        "not supported": "generate",
-        "useful": END,
-        "not useful": "transform_query",
-    },
-)
+# workflow.add_conditional_edges(
+#     "generate",
+#     grade_generation_v_documents_and_question,
+#     {
+#         "not supported": "generate",
+#         "useful": END,
+#         "not useful": "transform_query",
+#     },
+# )
+
+workflow.add_edge("generate",END)
 
 
 #Persistence
@@ -715,7 +734,12 @@ def callMessages():
         userQuestion = input("Digite uma pergunta: ")
         userID= input("id: ")
 
-        print(f"resposta: {getAIAnswer(userQuestion,userID)}")
+        try:
+            print(f"resposta: {getAIAnswer(userQuestion,userID)}")  
+        except Exception:
+            print("tive um problema processando a sua pergunta. Por favor, tente novamente.")
+
+       
 
         keepActive = input("Do you want to keep the System Active?(y/n): ")
         if keepActive == "n": 
