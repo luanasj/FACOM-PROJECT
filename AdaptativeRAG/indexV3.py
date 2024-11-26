@@ -328,7 +328,20 @@ question_rewriter = re_write_prompt | llm | StrOutputParser()
 
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-web_search_tool = TavilySearchResults(k=3)
+# web_search_tool = TavilySearchResults(k=3)
+
+web_search_tool = TavilySearchResults(
+    max_results=3,
+    search_depth="advanced",
+    include_answer=True,
+    include_raw_content=True,
+    include_images=True,
+    include_domains=["facom.ufba.br","portal.ufba.br","supac.ufba.br","supac.ufba.br"],
+    # exclude_domains=[...],
+    # name="...",            # overwrite default tool name
+    # description="...",     # overwrite default tool description
+    # args_schema=...,       # overwrite default args_schema: BaseModel
+)
 
 ### Construct the graph
 
