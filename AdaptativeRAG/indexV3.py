@@ -37,11 +37,13 @@ for item in pdflinks:
 
 
 # Web pages to index
-urls = [
-    "https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba",
-    "https://facom.ufba.br/portal/informes/783/facom-recebe-novos-estudantes-com-programacao-de-acolhimento-",
-    "https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores",
-]
+# urls = [
+#     "https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba",
+#     "https://facom.ufba.br/portal/pagina/47/",
+#     "https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores",
+# ]
+
+urls = [{"link":"https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba","description":"resultado para a selecao de estagio remunerado;"},{"link":"https://facom.ufba.br/portal/pagina/47/","description":"orientações sobre estágio,atividades complementares,atestado,trancamento, salvador card e inscrições em componentes de outros cursos;"},{"link":"https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores", "description":"incricoes para selecao de monitores"}]
 
 ### Build Index
 import bs4
@@ -74,9 +76,10 @@ bs4_strainer = bs4.SoupStrainer(class_="pagina-interna")
 # Carregar documentos da web 
 docs = [] 
 for url in urls: 
-    loader = WebBaseLoader(web_paths=(url,), bs_kwargs=dict(parse_only=bs4_strainer)) 
+    loader = WebBaseLoader(web_paths=(url["link"],), bs_kwargs=dict(parse_only=bs4_strainer)) 
     loader.requests_kwargs = {'verify': False} 
     docs.extend(loader.load())
+
 
 # Carregar documentos PDF 
 for pdf in pdflinks: 
@@ -160,9 +163,17 @@ class RouteQuery(BaseModel):
 llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 structured_llm_router = llm.with_structured_output(RouteQuery)
 
+#VectorStore content description
+
+vectorstoreContent = ""
+
+for url in urls:
+    vectorstoreContent += url["description"] + " "
+
+
 # Prompt
-system = """You are an expert at routing a user question to a vectorstore or web search.
-The vectorstore contains documents related to agents, prompt engineering, and adversarial attacks.
+system = f"""You are an expert at routing a user question to a vectorstore or web search.
+The vectorstore contains documents related to {vectorstoreContent}.
 Use the vectorstore for questions on these topics. Otherwise, use web-search."""
 route_prompt = ChatPromptTemplate.from_messages(
     [
