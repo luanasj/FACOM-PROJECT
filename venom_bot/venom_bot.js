@@ -9,8 +9,12 @@ function start(client) {
       // .then(res=>res.json())
       // .then(resposta => {return resposta})
 
+      const resposta = await fetch(`http://127.0.0.1:5000/aimessage/${message.body}/${message.from}`)
+      .then(res=>res.text())
+      .then(resposta => {return resposta})
+
       client
-        .sendText(message.from, "recebi sua mensagem")
+        .sendText(message.from, resposta)
         .then((result) => {
           console.log('Result: ', result); //return object success
         })
@@ -23,7 +27,8 @@ function start(client) {
 
 venom
   .create({
-    session: "session_facom_1" //name of session
+    session: "session_facom_1", //name of session
+    headless: false
   })
   .then((client) => start(client))
   .catch((erro) => {

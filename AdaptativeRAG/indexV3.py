@@ -718,8 +718,8 @@ app = workflow.compile(checkpointer=memory)
 
 # Run
 
-def getAIAnswer(question,thread_id):
-    config = {"configurable": {"thread_id": thread_id}}
+def getAIAnswer(question,user_id):
+    config = {"configurable": {"user_id":user_id,"thread_id": "1"}}
     input_message = HumanMessage(content=question)
 
 
@@ -728,32 +728,59 @@ def getAIAnswer(question,thread_id):
     
     return AIanswerContent
 
-systemActive = True
+# systemActive = True
 
-def systemActivation():
-    global systemActive
-    systemActive = not systemActive
+# def systemActivation():
+#     global systemActive
+#     systemActive = not systemActive
 
-def callMessages():
-    global systemActive
-    while systemActive:
-        userQuestion = input("Digite uma pergunta: ")
-        userID= input("id: ")
+# def callMessages():
+#     global systemActive
+#     while systemActive:
+#         userQuestion = input("Digite uma pergunta: ")
+#         userID= input("id: ")
 
-        try:
-            print(f"resposta: {getAIAnswer(userQuestion,userID)}")  
-        except Exception:
-            print("tive um problema processando a sua pergunta. Por favor, tente novamente.")
+#         try:
+#             print(f"resposta: {getAIAnswer(userQuestion,userID)}")  
+#         except Exception:
+#             print("tive um problema processando a sua pergunta. Por favor, tente novamente.")
 
        
 
-        keepActive = input("Do you want to keep the System Active?(y/n): ")
-        if keepActive == "n": 
-            systemActivation()
+#         keepActive = input("Do you want to keep the System Active?(y/n): ")
+#         if keepActive == "n": 
+#             systemActivation()
 
 
-callMessages()
+# callMessages()
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
+from markupsafe import escape
+
+# @app.route("/<name>")
+# def hello(name):
+#     return f"Hello, {escape(name)}!"
+
+
+@app.route("/aimessage/<question>/<messageid>")
+def hello(question,messageid):
+    print(escape(question),escape(messageid))
+    try:
+        respostaDaAi = getAIAnswer(f"{escape(question)}",f"{escape(messageid)[4:7]}")
+        return respostaDaAi  
+    except Exception as e:
+        print(e)
+        return "tive um problema processando a sua pergunta. Por favor, tente novamente."
 
 
 
 
+
+#python -m flask --app indexV3 run
