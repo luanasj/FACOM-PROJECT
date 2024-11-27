@@ -172,7 +172,7 @@ structured_llm_router = llm.with_structured_output(RouteQuery)
 vectorstoreContent = ""
 
 for url in urls:
-    vectorstoreContent += url["description"] + " "
+    vectorstoreContent += f"""- {url["description"]}\n"""
 
 
 # Prompt
@@ -183,7 +183,13 @@ The vectorstore contains documents related to the following topics:
 
 Use the vectorstore for questions on these topics.
 
-For all other questions, including those not explicitly mentioned or when the information is not found in the vectorstore, use web search.
+For all other questions, including those not explicitly mentioned or when the information is not found in the vectorstore, use web search. 
+
+Examples: 
+1. "Como faço para tirar/abonar uma falta?" -> Use vectorstore 
+2. "Como eu faço meu salvadorcard?" -> Use vectorstore 
+3. "Quais sao os professores da facom?" -> Use web search 
+4. "Como faço para trocar de curso?" -> Use web search
 
 Your goal is to provide accurate and relevant responses based on the user's query."""
 
