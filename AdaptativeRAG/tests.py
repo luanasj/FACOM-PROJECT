@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,request
 
 app = Flask(__name__)
 
@@ -8,9 +8,11 @@ def hello_world():
 
 from markupsafe import escape
 
-@app.route("/<name>")
+@app.route("/<name>",methods=["GET","POST"])
 def hello(name):
-    return f"Hello, {escape(name)}!"
+    return f"Hello, {escape(name)} \n request info: {request.get_json().get('pergunta')} !"
+
+
 
 
 

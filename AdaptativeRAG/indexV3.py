@@ -754,7 +754,7 @@ def getAIAnswer(question,user_id):
 
 # callMessages()
 
-from flask import Flask
+from flask import Flask,request
 from markupsafe import escape
 
 app = Flask(__name__)
@@ -770,11 +770,11 @@ def hello_world():
 #     return f"Hello, {escape(name)}!"
 
 
-@app.route("/aimessage/<question>/<messageid>")
-def hello(question,messageid):
-    print(escape(question),escape(messageid))
+@app.route("/aimessage/<messageid>",methods=["POST"])
+def hello(messageid):
+    print(escape(request.get_json().get('pergunta')),escape(messageid))
     try:
-        respostaDaAi = getAIAnswer(f"{escape(question)}",f"{escape(messageid).split(sep='@')[0]}")
+        respostaDaAi = getAIAnswer(f"{escape(request.get_json().get('userMessage'))}",f"{escape(messageid).split(sep='@')[0]}")
         return respostaDaAi  
     except Exception as e:
         print(e)
