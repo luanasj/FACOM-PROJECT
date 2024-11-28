@@ -711,7 +711,7 @@ memory = MemorySaver()
 
 
 # Compile
-app = workflow.compile(checkpointer=memory)
+compiled_workflow = workflow.compile(checkpointer=memory)
 
 
 # from pprint import pprint
@@ -723,7 +723,7 @@ def getAIAnswer(question,user_id):
     input_message = HumanMessage(content=question)
 
 
-    AIanswer = app.invoke({"question": [input_message]}, config, stream_mode="values")
+    AIanswer = compiled_workflow.invoke({"question": [input_message]}, config, stream_mode="values")
     AIanswerContent = AIanswer["messages"][-1].content
     
     return AIanswerContent
@@ -755,6 +755,7 @@ def getAIAnswer(question,user_id):
 # callMessages()
 
 from flask import Flask
+from markupsafe import escape
 
 app = Flask(__name__)
 
@@ -762,7 +763,7 @@ app = Flask(__name__)
 def hello_world():
     return "<p>Hello, World!</p>"
 
-from markupsafe import escape
+
 
 # @app.route("/<name>")
 # def hello(name):
@@ -773,7 +774,7 @@ from markupsafe import escape
 def hello(question,messageid):
     print(escape(question),escape(messageid))
     try:
-        respostaDaAi = getAIAnswer(f"{escape(question)}",f"{escape(messageid)[4:7]}")
+        respostaDaAi = getAIAnswer(f"{escape(question)}",f"{escape(messageid).split(sep='@')[0]}")
         return respostaDaAi  
     except Exception as e:
         print(e)
