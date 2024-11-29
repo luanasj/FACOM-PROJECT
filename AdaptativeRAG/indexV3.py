@@ -718,8 +718,8 @@ compiled_workflow = workflow.compile(checkpointer=memory)
 
 # Run
 
-def getAIAnswer(question,user_id):
-    config = {"configurable": {"user_id":user_id,"thread_id": "1"}}
+def getAIAnswer(question,user_id,thread_id):
+    config = {"configurable": {"user_id":user_id,"thread_id": thread_id}}
     input_message = HumanMessage(content=question)
 
 
@@ -772,9 +772,11 @@ def hello_world():
 
 @app.route("/aimessage/<messageid>",methods=["POST"])
 def hello(messageid):
-    print(escape(request.get_json().get('pergunta')),escape(messageid))
+    # print(escape(request.get_json().get('pergunta')),escape(messageid))
+    userNumber = escape(messageid).split(sep='@')[0]
+    userMessage = escape(request.get_json().get('userMessage'))
     try:
-        respostaDaAi = getAIAnswer(f"{escape(request.get_json().get('userMessage'))}",f"{escape(messageid).split(sep='@')[0]}")
+        respostaDaAi = getAIAnswer(f"{userMessage}",f"{userNumber}",f"{userNumber[-1]}")
         return respostaDaAi  
     except Exception as e:
         print(e)
