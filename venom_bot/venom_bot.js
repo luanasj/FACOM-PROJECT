@@ -1,10 +1,13 @@
-const venom = require('venom-bot');
-const fs = require('fs');
+// const venom = require('venom-bot');
+// const fs = require('fs');
+
+import venom from 'venom-bot'
+// import fs from 'fs'
 
 function start(client) {
   client.onMessage(async (message) => {
       if (message.body) {
-      console.log(message.body)
+      // console.log(message.body)
       // const resposta = await fetch("http://127.0.0.1:5000/aimessage", {method:"POST", body: JSON.stringify(message.body)})
       // .then(res=>res.json())
       // .then(resposta => {return resposta})
@@ -16,8 +19,8 @@ function start(client) {
           userMessage:`${message.body}`
       })}
       )
-      .then(res=>res.text())
-      .then(resposta => {return resposta})
+      .then(dados=>dados.text())
+      .then(res => {return res})
 
       client
         .sendText(message.from, resposta)
