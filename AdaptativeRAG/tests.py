@@ -19,7 +19,7 @@ def getSelectorsFromJSON(jsonPath):
 
     selectors += f"{len(dadosJSON)+1} Outros" 
 
-    print(selectors)
+    return selectors
 
 llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 
