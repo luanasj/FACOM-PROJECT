@@ -431,7 +431,7 @@ def generate(state):
     question = state["question"][-1]
     question = question.content
     documents = state["documents"]
-    history = state["messages"][:5]
+    history = state["messages"][-4:-1]
     
     
 
@@ -452,7 +452,7 @@ def generate_without_rag(state):
     print("---GENERATE---")
     question = state["question"][-1]
     documents = ""
-    history = state["messages"][:5]
+    history = state["messages"][-4:-1]
     
     
 
