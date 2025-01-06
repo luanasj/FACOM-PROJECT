@@ -41,12 +41,6 @@ function start(client) {
                 console.error('Error when sending: ', erro); //return object error
               });
           }
-
-
-
-
-
-
     }
   });
 }

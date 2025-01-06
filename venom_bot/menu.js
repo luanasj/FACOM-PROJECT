@@ -20,20 +20,8 @@ const getSelectorContent = (message)=>{
     return selectorStore[message].description
 }
 
-
-
-console.log(isMenuSelector("1"))
-console.log(getSelectorContent("1"))
-
-
 export {isMenuSelector,getSelectorContent}
 
-// const menuSelectorContent = (selector)=>{
-//     let message = [1,7,8,9]
-
-// }
-
-// console.log(selectorStore.)
 
 
 
