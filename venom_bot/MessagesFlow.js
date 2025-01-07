@@ -1,5 +1,6 @@
 import {isMenuSelector,getSelectorContent} from './menu.js'
 
+const chatbotEndpoint = "http://127.0.0.1:5000/aimessage"
 
 function sendTextToUser(client,message,answer){
   client
@@ -13,7 +14,7 @@ function sendTextToUser(client,message,answer){
 }
 
 async function getAnswerFromChatBot(message){
-  const response = await fetch(`http://127.0.0.1:5000/aimessage/${message.from}`,
+  const response = await fetch(`${chatbotEndpoint}/${message.from}`,
         {method:"POST",
         headers: {'Content-Type': 'application/json'},
         body:JSON.stringify({
@@ -24,13 +25,20 @@ async function getAnswerFromChatBot(message){
   return response
 }
 
+
 async function getAnswer(message){
   if(message.body.length < 2 && isMenuSelector(message.body)){
     //RESPOSTA MENU
     return getSelectorContent(message.body)
-  }
+  } 
   //RESPOSTA CHATBOT
   return await getAnswerFromChatBot(message)
+}
+
+function answerToMedia(client,message){
+  // RESPOSTA MENSAGEM DE MÍDIA
+  const response = "Sinto muito, mas não consigo processar este formato de mensagem.\nPor favor envie uma mensagem de texto."
+  sendTextToUser(client,message,response) 
 }
 
 async function tradeMessageWithChatbot(client,message) {
@@ -38,7 +46,7 @@ async function tradeMessageWithChatbot(client,message) {
   sendTextToUser(client,message,response)
 }
 
-export {tradeMessageWithChatbot}
+export {tradeMessageWithChatbot, answerToMedia}
 
 
 
