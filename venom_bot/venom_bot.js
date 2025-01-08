@@ -1,15 +1,48 @@
 
 import venom from 'venom-bot'
 import {tradeMessageWithChatbot,answerToMedia} from "./messagesFlow.js"
-// import fs from 'fs'
 
 function start(client) {
+
+  //Se comunica com o chatbot
   client.onMessage(async (message) => {
     if (message.type == 'chat') {
         tradeMessageWithChatbot(client,message)
     }else{
         answerToMedia(client,message)
     }
+  });
+
+  // Ajuda a menter a sessãoo ativa
+  client.onStateChange((state) => {
+    console.log('State changed: ', state);
+    // force whatsapp take over
+    if ('CONFLICT'.includes(state)) client.useHere();
+    // detect disconnect on whatsapp
+    if ('UNPAIRED'.includes(state)) console.log('logout');
+  });
+  
+  
+  let time = 0;
+  client.onStreamChange((state) => {
+    console.log('State Connection Stream: ' + state);
+    clearTimeout(time);
+    if (state === 'DISCONNECTED' || state === 'SYNCING') {
+      time = setTimeout(() => {
+        client.close();
+      }, 80000);
+    }
+  });
+  
+  // function to detect incoming call
+  client.onIncomingCall(async (call) => {
+    client.sendText(call.peerJid, "Sinto muito, eu não atendo ligações.");
+  });
+
+
+  //Fecha corretamente o cliente quando o processo é encerrado
+  process.on('SIGINT', function() {
+    client.close();
   });
 }
 
