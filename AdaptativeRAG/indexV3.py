@@ -2,111 +2,43 @@ from dotenv import load_dotenv
 load_dotenv()
 # #generation prompt "luanasjdev/rag-prompt-with-chat-history"
 
-import requests
-import os
+###RAG Tools 
 
-### Download pdfs
-def baixar_pdf(url, pasta_destino, nome_arquivo):
-    # Verifica se a pasta de destino existe, se não, cria a pasta
-    if not os.path.exists(pasta_destino):
-        os.makedirs(pasta_destino)
-    
-    # Faz o download do PDF
-    resposta = requests.get(url, verify=False)
-    
-    # Caminho completo do arquivo
-    caminho_arquivo = os.path.join(pasta_destino, f"{nome_arquivo}")
-    
-    # Salva o PDF na pasta de destino
-    with open(caminho_arquivo, 'wb') as pdf_file:
-        pdf_file.write(resposta.content)
-    
-    print(f"PDF salvo em: {caminho_arquivo}")
+## Get Index of Information
 
-# PDFs to index
+from RAG.tools import retriever
 
-pdflinks = [{"link":f"https://facom.ufba.br/portal/conteudo/files/EDITAL%20PROEXT%202024.pdf","title":"pdf1"},{"link":f"https://facom.ufba.br/portal/conteudo/files/Guia%20do%20semestre%20para%20estudantes%20da%20FACOM%202024-2.pdf","title":"pdf2"}]
+## Search
 
-pasta_destino_pdfs = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp'
-#pdf_paths = []
+from langchain_community.tools.tavily_search import TavilySearchResults
 
+# web_search_tool = TavilySearchResults(k=3)
 
-for item in pdflinks:
-    baixar_pdf(item["link"], pasta_destino_pdfs, item["title"]+".pdf")
-#    pdf_paths.append("../temp/" + item["title"] +  ".pdf")
+web_search_tool = TavilySearchResults(
+    max_results=3,
+    search_depth="advanced",
+    include_answer=True,
+    include_raw_content=True,
+    include_images=True,
+    include_domains=["facom.ufba.br"]
+    # include_domains=["facom.ufba.br","portal.ufba.br","supac.ufba.br","supac.ufba.br"],
+    # exclude_domains=[...],
+    # name="...",            # overwrite default tool name
+    # description="...",     # overwrite default tool description
+    # args_schema=...,       # overwrite default args_schema: BaseModel
+)
 
-
-# Web pages to index
-# urls = [
-#     "https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba",
-#     "https://facom.ufba.br/portal/pagina/47/",
-#     "https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores",
-# ]
-
-urls = [{"link":"https://facom.ufba.br/portal/informes/787/confira-resultado-final-da-selecao-para-estagio-remunerado-na-facom-ufba","description":"resultado para a selecao de estagio remunerado;"},{"link":"https://facom.ufba.br/portal/pagina/47/","description":"orientações sobre estágio,atividades complementares,atestado medico (abono de falta),trancamento de disciplinas, salvador card e inscrição em componentes de outros cursos;"},{"link":"https://facom.ufba.br/portal/informes/777/departamento-de-comunicacao-abre-inscricoes-para-selecao-de-monitores", "description":"incricoes para selecao de monitores"}]
-
-### Build Index
-import bs4
-from langchain import hub
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_community.vectorstores import Chroma
+#Define LLM
 
 from langchain_groq import ChatGroq
-from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.runnables import RunnablePassthrough
-
-# from langchain_openai import OpenAIEmbeddings
-
-from langchain_cohere import CohereEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
-
 
 llm = ChatGroq(model="llama3-8b-8192",temperature=0)
-
-# Set embeddings
-embd = CohereEmbeddings(model='embed-english-v3.0')
-
-
-#docs
-# Defina o filtro para incluir apenas a parte específica da página 
-bs4_strainer = bs4.SoupStrainer(class_="pagina-interna")
-
-
-# Carregar documentos da web 
-docs = [] 
-for url in urls: 
-    loader = WebBaseLoader(web_paths=(url["link"],), bs_kwargs=dict(parse_only=bs4_strainer)) 
-    loader.requests_kwargs = {'verify': False} 
-    docs.extend(loader.load())
-
-
-# Carregar documentos PDF 
-for pdf in pdflinks: 
-    loader = PyPDFLoader(os.path.join(pasta_destino_pdfs, pdf["title"] + ".pdf")) 
-    docs.extend(loader.load())
-
-
-# Split
-text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=300, chunk_overlap=20
-)
-doc_splits = text_splitter.split_documents(docs)
-
-# Add to vectorstore
-vectorstore = Chroma.from_documents(
-    documents=doc_splits,
-    collection_name="rag-chroma",
-    embedding=embd,
-)
-retriever = vectorstore.as_retriever()
 
 ### Router
 
 from typing import Literal
 
 from langchain_core.prompts import ChatPromptTemplate
-# from langchain_groq import ChatGroq
 
 from pydantic import BaseModel, Field
 
@@ -125,7 +57,7 @@ class rag_or_generate(BaseModel):
     )
 
 # LLM with function call
-# llm = ChatGroq(model="llama3-8b-8192",temperature=0)
+
 structured_llm_decision_maker = llm.with_structured_output(rag_or_generate)
 
 # Prompt
@@ -169,11 +101,7 @@ structured_llm_router = llm.with_structured_output(RouteQuery)
 
 #VectorStore content description
 
-vectorstoreContent = ""
-
-for url in urls:
-    vectorstoreContent += f"""- {url["description"]}\n"""
-
+from RAG.tools import vectorstoreContent
 
 # Prompt
 system = f"""You are an expert at determining whether to retrieve information from a vectorstore or perform a web search based on a user's question.
@@ -193,9 +121,6 @@ Examples:
 
 Your goal is to provide accurate and relevant responses based on the user's query."""
 
-# system = f"""You are an expert at routing a user question to a vectorstore or web search.
-# The vectorstore contains documents related to {vectorstoreContent}.
-# Use the vectorstore for questions on these topics. Otherwise, use web-search."""
 
 route_prompt = ChatPromptTemplate.from_messages(
     [
@@ -220,7 +145,7 @@ class GradeDocuments(BaseModel):
 
 # LLM with function call
 # llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-structured_llm_grader = llm.with_structured_output(GradeDocuments)
+structured_llm_retrieval_grader = llm.with_structured_output(GradeDocuments)
 
 # Prompt
 system = """You are a grader assessing relevance of a retrieved document to a user question. \n 
@@ -234,7 +159,7 @@ grade_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-retrieval_grader = grade_prompt | structured_llm_grader
+retrieval_grader = grade_prompt | structured_llm_retrieval_grader
 
 ### Generate
 
@@ -293,7 +218,6 @@ no_rag_prompt = ChatPromptTemplate.from_messages(
 no_rag_chain = no_rag_prompt | llm | StrOutputParser()
 
 
-
 ### Hallucination Grader
 
 
@@ -308,7 +232,7 @@ class GradeHallucinations(BaseModel):
 
 # LLM with function call
 # llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-structured_llm_grader = llm.with_structured_output(GradeHallucinations)
+structured_llm_hallucination_grader = llm.with_structured_output(GradeHallucinations)
 
 # Prompt
 system = """You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts. \n 
@@ -320,7 +244,7 @@ hallucination_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-hallucination_grader = hallucination_prompt | structured_llm_grader
+hallucination_grader = hallucination_prompt | structured_llm_hallucination_grader
 
 ### Answer Grader
 
@@ -336,7 +260,7 @@ class GradeAnswer(BaseModel):
 
 # LLM with function call
 # llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-structured_llm_grader = llm.with_structured_output(GradeAnswer)
+structured_llm_answer_grader = llm.with_structured_output(GradeAnswer)
 
 # Prompt
 system = """You are a grader assessing whether an answer addresses / resolves a question \n 
@@ -348,12 +272,9 @@ answer_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-answer_grader = answer_prompt | structured_llm_grader
+answer_grader = answer_prompt | structured_llm_answer_grader
 
 ### Question Re-writer
-
-# LLM
-# llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 
 # Prompt
 system = """You a question re-writer that converts an input question to a better version that is optimized \n 
@@ -371,25 +292,6 @@ re_write_prompt = ChatPromptTemplate.from_messages(
 question_rewriter = re_write_prompt | llm | StrOutputParser()
 
 
-### Search
-
-from langchain_community.tools.tavily_search import TavilySearchResults
-
-# web_search_tool = TavilySearchResults(k=3)
-
-web_search_tool = TavilySearchResults(
-    max_results=3,
-    search_depth="advanced",
-    include_answer=True,
-    include_raw_content=True,
-    include_images=True,
-    include_domains=["facom.ufba.br"]
-    # include_domains=["facom.ufba.br","portal.ufba.br","supac.ufba.br","supac.ufba.br"],
-    # exclude_domains=[...],
-    # name="...",            # overwrite default tool name
-    # description="...",     # overwrite default tool description
-    # args_schema=...,       # overwrite default args_schema: BaseModel
-)
 
 ### Construct the graph
 

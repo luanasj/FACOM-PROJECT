@@ -1,4 +1,3 @@
-
 import venom from 'venom-bot'
 import {tradeMessageWithChatbot,answerToMedia} from "./messagesFlow.js"
 
