@@ -6,7 +6,6 @@ from agents.structuredLLM import structured_llm_decision_maker, structured_llm_r
 #Define LLM
 
 from langchain_groq import ChatGroq
-
 llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 
 ###Routers
@@ -14,6 +13,7 @@ llm = ChatGroq(model="llama3-8b-8192",temperature=0)
 # Route to retrieve or generate
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 # Prompt
 
@@ -46,7 +46,7 @@ agent_router = agent_prompt | structured_llm_decision_maker
 
 import sys 
 import os 
-# # Adicionando o diretório 'modulos' ao sys.path 
+# # Adicionando o diretório 'RAG' ao sys.path 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../RAG'))
 
 from RAG.tools import vectorstoreContent
@@ -146,7 +146,6 @@ question_rewriter = re_write_prompt | llm | StrOutputParser()
 
 from langchain import hub
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
 
 ## RAG generate
 # Prompt
@@ -162,6 +161,9 @@ rag_chain = rag_prompt | llm | StrOutputParser()
 from agents.utils import getSelectorsFromJSON
 
 # Prompt
+
+JSONpath = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\externalInfo.json'
+
 no_rag_prompt = ChatPromptTemplate.from_messages(
     [(
             "system",
@@ -169,7 +171,7 @@ no_rag_prompt = ChatPromptTemplate.from_messages(
 
             Caso seja a primeira mensagem do usuário ou uma saudação como "olá", "bom dia", "você pode me ajudar","tenho uma dúvida", peça que o usuário escolha uma das opcções do menu abaixo digitando o número da opção desejada. 
 
-            {getSelectorsFromJSON('../externalInfo.json')}
+            {getSelectorsFromJSON(JSONpath)}
             
             Caso não seja nenhuma das opções acima, o usuário deve digitar a sua pergunta.
             ''',
