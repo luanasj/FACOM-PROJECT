@@ -82,19 +82,19 @@ memory = MemorySaver()
 compiled_workflow = workflow.compile(checkpointer=memory)
 
 
-# from pprint import pprint
+## utilitary functions
+
+from support.functions import clearFolder,getAIAnswer
+
+import signal
+import sys
+
+def sigint_handler(sig, frame):
+    tempFolderPath = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp\*'
+    clearFolder(tempFolderPath)
+    sys.exit(0)
 
 # Run
-
-def getAIAnswer(workflow,question,user_id,thread_id):
-    config = {"configurable": {"user_id":user_id,"thread_id": thread_id}}
-    input_message = HumanMessage(content=question)
-
-
-    AIanswer = workflow.invoke({"question": [input_message]}, config, stream_mode="values")
-    AIanswerContent = AIanswer["messages"][-1].content
-    
-    return AIanswerContent
 
 from flask import Flask,request
 from markupsafe import escape
@@ -117,6 +117,6 @@ def hello(messageid):
         print(e)
         return "tive um problema processando a sua pergunta. Por favor, tente novamente."
 
+signal.signal(signal.SIGINT, sigint_handler)
 
 #python -m flask --app file run
-

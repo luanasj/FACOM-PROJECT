@@ -1,6 +1,12 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+# # Adicionando o diretório avô 'AdaptativeRAG' ao sys.path 
+import sys 
+import os 
+
+sys.path.append(os.path.join(os.path.dirname(__file__), r"C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG" ))
+
 from agents.structuredLLM import structured_llm_decision_maker, structured_llm_router, structured_llm_hallucination_grader,structured_llm_retrieval_grader,structured_llm_answer_grader
 
 #Define LLM
@@ -44,10 +50,7 @@ agent_router = agent_prompt | structured_llm_decision_maker
 
 #VectorStore content description
 
-import sys 
-import os 
-# # Adicionando o diretório 'RAG' ao sys.path 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../RAG'))
+
 
 from RAG.tools import vectorstoreContent
 

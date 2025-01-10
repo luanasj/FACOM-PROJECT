@@ -1,8 +1,7 @@
 import sys 
 import os 
 # # Adicionando o diretório 'RAG' e 'agents' ao sys.path 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../RAG'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../agents'))
+sys.path.append(os.path.join(os.path.dirname(__file__), r"C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG"))
 
 ## Get Index of Information and Search tool
 from RAG.tools import retriever, web_search_tool
