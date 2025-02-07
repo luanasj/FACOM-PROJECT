@@ -1,6 +1,6 @@
-$pyhtonCommand = "node caminho/para/seu/arquivo"
-$nodeCommand = "python caminho/para/seu/arquivo"
-$logsPath = "caminho/para/logs"
+$pyhtonCommand = "-NoExit -Command node C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\venom_bot\venom_bot.js"
+$nodeCommand = "-NoExit -Command python -m flask --app C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG\langchain_bot.py run"
+$logsPath = "C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\exec\logs.txt"
 
 
 # restart-projects.ps1
@@ -9,14 +9,16 @@ $logsPath = "caminho/para/logs"
 function Start-NodeProject {
     Stop-Process -Name "node" -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 30
-    Start-Process powershell -ArgumentList [string]::Concat("-NoExit -Command", $nodeCommand) -WindowStyle Hidden
+    # Start-Process powershell -ArgumentList $nodeCommand -WindowStyle Hidden
+    Start-Process powershell -ArgumentList $nodeCommand 
 }
 
 # Função para iniciar o projeto Python
 function Start-PythonProject {
     Stop-Process -Name "python" -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 30
-    Start-Process powershell -ArgumentList [string]::Concat("-NoExit -Command", $pyhtonCommand) -WindowStyle Hidden
+    # Start-Process powershell -ArgumentList  $pyhtonCommand -WindowStyle Hidden
+    Start-Process powershell -ArgumentList  $pyhtonCommand 
 }
 
 # Loop infinito para reiniciar os projetos de tempos em tempos
