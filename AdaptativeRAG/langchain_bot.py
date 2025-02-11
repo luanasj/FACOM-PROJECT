@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
+import os
 
 ### Construct the graph
 
@@ -90,7 +91,7 @@ import signal
 import sys
 
 def sigint_handler(sig, frame):
-    tempFolderPath = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp\*'
+    tempFolderPath = f'{os.getenv("commonPathBot")}\\temp\\*'
     clearFolder(tempFolderPath)
     sys.exit(0)
 
@@ -119,4 +120,4 @@ def hello(messageid):
 
 signal.signal(signal.SIGINT, sigint_handler)
 
-#python -m flask --app file run
+#gitfile run

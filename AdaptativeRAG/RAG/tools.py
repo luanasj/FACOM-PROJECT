@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
+import os
 
 from RAG.utils import baixar_pdf,getDocs,getVectorStoreContent
 
@@ -7,7 +8,7 @@ from RAG.utils import baixar_pdf,getDocs,getVectorStoreContent
 
 pdflinks = [{"link":f"https://facom.ufba.br/portal/conteudo/files/EDITAL%20PROEXT%202024.pdf","title":"pdf1"},{"link":f"https://facom.ufba.br/portal/conteudo/files/Guia%20do%20semestre%20para%20estudantes%20da%20FACOM%202024-2.pdf","title":"pdf2"}]
 
-pasta_destino_pdfs = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp'
+pasta_destino_pdfs = f'{os.getenv("commonPathBot")}\temp'
 
 for item in pdflinks:
     baixar_pdf(item["link"], pasta_destino_pdfs, item["title"]+".pdf")
