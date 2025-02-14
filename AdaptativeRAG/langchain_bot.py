@@ -91,7 +91,7 @@ import signal
 import sys
 
 def sigint_handler(sig, frame):
-    tempFolderPath = f'{os.getenv("commonPathBot")}\\temp\\*'
+    tempFolderPath = os.getenv("commonPathBot")+'\\temp\\*'
     clearFolder(tempFolderPath)
     sys.exit(0)
 

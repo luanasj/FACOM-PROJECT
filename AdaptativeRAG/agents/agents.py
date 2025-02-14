@@ -5,7 +5,7 @@ load_dotenv()
 import sys 
 import os 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), f"{os.getenv('commonPathBot')}\\AdaptativeRAG" ))
+sys.path.append(os.path.join(os.path.dirname(__file__), os.getenv('commonPathBot') + "\\AdaptativeRAG" ))
 
 from agents.structuredLLM import structured_llm_decision_maker, structured_llm_router, structured_llm_hallucination_grader,structured_llm_retrieval_grader,structured_llm_answer_grader
 
@@ -165,7 +165,7 @@ from agents.utils import getSelectorsFromJSON
 
 # Prompt
 
-JSONpath = f'{os.getenv("commonPathBot")}\\externalInfo.json'
+JSONpath = os.getenv("commonPathBot")+"\\externalInfo.json"
 
 no_rag_prompt = ChatPromptTemplate.from_messages(
     [(
