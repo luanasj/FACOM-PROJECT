@@ -10,6 +10,10 @@ $global:pythonProcess = $null
 function Start-NodeProject {
     try {
         Stop-Process -Name "node" -ErrorAction SilentlyContinue
+        if ($global:nodeProcess) {
+            Start-Sleep -Seconds 3
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
         Start-Sleep -Seconds 20
         $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
         Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
@@ -22,6 +26,10 @@ function Start-NodeProject {
 function Start-PythonProject {
     try {
         Stop-Process -Name "python" -ErrorAction SilentlyContinue
+        if($global:pythonProcess){
+            Start-Sleep -Seconds 3
+            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
         Start-Sleep -Seconds 20
         $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru
         Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
@@ -34,6 +42,7 @@ function Start-PythonProject {
 # $exitAction = {
 #     Write-Output "A execução do script foi interrompida em: $(Get-Date)"
 #     if ($global:nodeProcess) {
+
 #         Stop-Process -Force -Id $global:nodeProcess.Id  -ErrorAction SilentlyContinue
 #     }
 #     if ($global:pythonProcess) {
@@ -49,10 +58,14 @@ function Cleanup {
         Write-Host "A execução do script foi interrompida em: $(Get-Date)"
         # if ($global:nodeProcess) {
             Stop-Process -Name "node" -Force -ErrorAction Stop
+            # Send-CtrlCToProcess -ProcessId $global:nodeProcess.Id
+            Start-Sleep -Seconds 3
             Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
         # }
         # if ($global:pythonProcess) {
             Stop-Process -Name "python" -Force -ErrorAction Stop
+            # Send-CtrlCToProcess -ProcessId $global:pythonProcess.Id
+            Start-Sleep -Seconds 3
             Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
         # }
         Write-Host "Removendo arquivos temporários..."
