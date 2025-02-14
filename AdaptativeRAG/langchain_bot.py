@@ -2,6 +2,13 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 
+## utilitary functions
+
+from support.functions import clearFolder,getAIAnswer
+
+tempFolderPath = os.getenv("commonPathBot")+'\\temp\\*'
+clearFolder(tempFolderPath)
+
 ### Construct the graph
 
 ##Define the graph state
@@ -83,9 +90,7 @@ memory = MemorySaver()
 compiled_workflow = workflow.compile(checkpointer=memory)
 
 
-## utilitary functions
 
-from support.functions import clearFolder,getAIAnswer
 
 import signal
 import sys
