@@ -10,7 +10,11 @@ $global:pythonProcess = $null
 function Start-NodeProject {
     try {
         Stop-Process -Name "node" -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 30
+        if ($global:nodeProcess) {
+            Start-Sleep -Seconds 3
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        Start-Sleep -Seconds 20
         $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
         Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
@@ -22,7 +26,11 @@ function Start-NodeProject {
 function Start-PythonProject {
     try {
         Stop-Process -Name "python" -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 30
+        if($global:pythonProcess){
+            Start-Sleep -Seconds 3
+            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        Start-Sleep -Seconds 20
         $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru
         Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
     } catch {
@@ -30,32 +38,62 @@ function Start-PythonProject {
     }
 }
 
-# Define a ação a ser executada quando o script for interrompido
-$exitAction = {
-    Write-Output "A execução do script foi interrompida em: $(Get-Date)"
-    if ($global:nodeProcess) {
-        Stop-Process -Force -Id $global:nodeProcess.Id  -ErrorAction SilentlyContinue
+# Função que será chamada na limpeza
+function Cleanup {
+    Write-Host "`nIniciando operações de limpeza..."
+    
+    try {
+        Write-Host "A execução do script foi interrompida em: $(Get-Date)"
+        if ($global:nodeProcess) {
+            Stop-Process -Name "node" -Force -ErrorAction Stop
+            Start-Sleep -Seconds 3
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        if ($global:pythonProcess) {
+            Stop-Process -Name "python" -Force -ErrorAction Stop
+            Start-Sleep -Seconds 3
+            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        Write-Host "Removendo arquivos temporários..."
+        Write-Host "Fechando conexões..."
+        Write-Host "Liberando recursos..."
+        Start-Sleep -Seconds 10
     }
-    if ($global:pythonProcess) {
-        Stop-Process -Force -Id $global:pythonProcess.Id -ErrorAction SilentlyContinue
+    catch {
+        Write-Host "Erro durante a limpeza: $_" -ForegroundColor Red
+    }
+    finally {
+        Write-Host "Operações de limpeza concluídas" -ForegroundColor Green
     }
 }
 
-# Registra o evento de interrupção do PowerShell
-Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $exitAction
-Register-EngineEvent -SourceIdentifier ConsoleBreak -Action $exitAction
-$null = Register-EngineEvent -SourceIdentifier ConsoleCancelEvent -Action $exitAction
+# Registra o manipulador de CTRL+C
+$null = Register-EngineEvent -SourceIdentifier 'PowerShell.Exiting' -Action {
+    Write-Host "`nCTRL+C detectado!"
+    Cleanup
+}
 
+try {
+    Write-Host "Script iniciado. Pressione CTRL+C para encerrar..."
+    
+    # Seu código principal aqui
+    while ($true) {
+        Start-NodeProject
+        Start-PythonProject
 
+        # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
+        Start-Sleep -Seconds 3600
 
-# Loop infinito para reiniciar os projetos de tempos em tempos
-while ($true) {
-    Start-NodeProject
-    Start-PythonProject
-
-    # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
-    Start-Sleep -Seconds 3600
-
-    # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
-    Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+        # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
+        Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+    }
+}
+catch {
+    Write-Host "`nErro não esperado: $_" -ForegroundColor Red
+}
+finally {
+    # Esta parte SEMPRE será executada, mesmo com CTRL+C
+    Cleanup
+    # Limpa o evento registrado
+    Get-EventSubscriber | Where-Object SourceIdentifier -eq 'PowerShell.Exiting' | Unregister-Event
 }

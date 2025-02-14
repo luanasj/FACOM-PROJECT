@@ -38,41 +38,26 @@ function Start-PythonProject {
     }
 }
 
-# Define a ação a ser executada quando o script for interrompido
-# $exitAction = {
-#     Write-Output "A execução do script foi interrompida em: $(Get-Date)"
-#     if ($global:nodeProcess) {
-
-#         Stop-Process -Force -Id $global:nodeProcess.Id  -ErrorAction SilentlyContinue
-#     }
-#     if ($global:pythonProcess) {
-#         Stop-Process -Force -Id $global:pythonProcess.Id -ErrorAction SilentlyContinue
-#     }
-# }
-
 # Função que será chamada na limpeza
 function Cleanup {
     Write-Host "`nIniciando operações de limpeza..."
     
     try {
         Write-Host "A execução do script foi interrompida em: $(Get-Date)"
-        # if ($global:nodeProcess) {
+        if ($global:nodeProcess) {
             Stop-Process -Name "node" -Force -ErrorAction Stop
-            # Send-CtrlCToProcess -ProcessId $global:nodeProcess.Id
             Start-Sleep -Seconds 3
             Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
-        # }
-        # if ($global:pythonProcess) {
+        }
+        if ($global:pythonProcess) {
             Stop-Process -Name "python" -Force -ErrorAction Stop
-            # Send-CtrlCToProcess -ProcessId $global:pythonProcess.Id
             Start-Sleep -Seconds 3
             Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
-        # }
+        }
         Write-Host "Removendo arquivos temporários..."
         Write-Host "Fechando conexões..."
         Write-Host "Liberando recursos..."
         Start-Sleep -Seconds 10
-
     }
     catch {
         Write-Host "Erro durante a limpeza: $_" -ForegroundColor Red
@@ -93,17 +78,14 @@ try {
     
     # Seu código principal aqui
     while ($true) {
-        # # Simulação de trabalho
-        # Start-Sleep -Seconds 1
-        # Write-Host "." -NoNewline
-    Start-NodeProject
-    Start-PythonProject
+        Start-NodeProject
+        Start-PythonProject
 
-    # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
-    Start-Sleep -Seconds 3600
+        # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
+        Start-Sleep -Seconds 3600
 
-    # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
-    Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+        # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
+        Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
     }
 }
 catch {
