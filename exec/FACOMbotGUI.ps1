@@ -16,12 +16,19 @@ $tabControl.Dock = "Fill"
 $tabPage1 = New-Object System.Windows.Forms.TabPage
 $tabPage1.Text = "Aba 1"
 
-#Adicionando controls na Aba 1
+#Adicionando Container/GroupBox para segmentar Aba 1
+$groupBox1 = New-Object System.Windows.Forms.GroupBox
+$groupBox1.Text = "Tópicos do Menu"
+$groupBox1.Size = New-Object System.Drawing.Size(400,200)
+$groupBox1.Location = New-Object System.Drawing.Point(20,20)
+$tabPage1.Controls.Add($groupBox1)
+
+#Adicionando controls no GroupBox1
 $label1 = New-Object System.Windows.Forms.Label
 $label1.Text = "Primeira Label da Aba 1"
 $label1.Location = New-Object System.Drawing.Point(20,20)
 $label1.Size = New-Object System.Drawing.Size(200,50)
-$tabPage1.Controls.Add($label1) 
+$groupBox1.Controls.Add($label1) 
 
 #Criar aba 2
 $tabPage2 = New-Object System.Windows.Forms.TabPage
@@ -44,3 +51,4 @@ $form.Controls.Add($tabControl)
 
 #Mostrar caixa de diálogo
 $form.ShowDialog()
+
