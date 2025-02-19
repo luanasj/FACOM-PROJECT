@@ -14,7 +14,7 @@ function Start-NodeProject {
             Start-Sleep -Seconds 3
             Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
         }
-        Start-Sleep -Seconds 20
+        Start-Sleep -Seconds 60
         $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
         Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
@@ -82,7 +82,7 @@ try {
         Start-PythonProject
 
         # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
-        Start-Sleep -Seconds 3600
+        Start-Sleep -Seconds 1200
 
         # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
         Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"

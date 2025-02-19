@@ -21,7 +21,11 @@ async function getAnswerFromChatBot(message){
             userMessage:`${message.body}`
         })})
         .then(dados=>dados.text())
-        .then(res => {return res})
+        .then(res => {
+          if(res.includes("html")){ throw new Error("Unexpected route used")}
+          return res
+        })
+        .catch(error => {return "Não consegui responder a sua mensagem, por favor, tente novamente em alguns instantes."})
   return response
 }
 
