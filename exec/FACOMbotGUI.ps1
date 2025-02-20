@@ -42,12 +42,18 @@ for($i=0;$i -lt 8;$i++){
     #$titleText.Text = ""
     $titleText.Location = New-Object System.Drawing.Point(($x+30),$y)
     $titleText.Size = New-Object System.Drawing.Size((15*$x),20)
+    $titleText.Multiline = $true
+    $titleText.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
     $groupBox1.Controls.Add($titleText)
        
     $descText = New-Object System.Windows.Forms.TextBox
     #$descText.Text = ""
     $descText.Location = New-Object System.Drawing.Point((17*$x+45),$y)
     $descText.Size = New-Object System.Drawing.Size((20*$x),100)
+    $descText.Multiline = $true  # Permitir múltiplas linhas
+    $descText.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+    #$descText.ForeColor = [System.Drawing.Color]::Blue 
+    #$descText.BackColor = [System.Drawing.Color]::LightYellow
     $groupBox1.Controls.Add($descText)
 
 }
@@ -81,4 +87,5 @@ $form.Controls.Add($tabControl)
 
 #Mostrar caixa de diálogo
 $form.ShowDialog()
+
 
