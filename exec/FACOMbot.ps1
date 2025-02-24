@@ -1,5 +1,29 @@
-$pyhtonCommand = "-NoExit -Command node C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\venom_bot\venom_bot.js"
-$nodeCommand = "-NoExit -Command python -m flask --app C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG\langchain_bot.py run"
+# Especificar o caminho para o arquivo .env
+$envPath = ".\.env"
+
+# Ler o conteúdo do arquivo .env
+$envContent = Get-Content -Path $envPath
+
+# Percorrer cada linha do arquivo .env
+foreach ($line in $envContent) {
+    # Ignorar linhas que são comentários ou estão vazias
+    if ($line -match '^\s*#' -or [string]::IsNullOrWhiteSpace($line)) {
+        continue
+    }
+
+    # Separar a linha em chave e valor
+    $parts = $line -split '='
+    $key = $parts[0].Trim()
+    $value = $parts[1].Trim()
+
+    # Configurar a variável de ambiente
+    [System.Environment]::SetEnvironmentVariable($key, $value)
+}
+
+
+
+$pyhtonCommand = "-NoExit -Command node " + $env:commonPathBot + "\venom_bot\venom_bot.js"
+$nodeCommand = "-NoExit -Command python -m flask --app "+ $env:commonPathBot +"\AdaptativeRAG\langchain_bot.py run"
 $logsPath = "C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\exec\logs.txt"
 
 # Variáveis globais para os processos
@@ -55,6 +79,12 @@ function Cleanup {
             Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
         }
         Write-Host "Removendo arquivos temporários..."
+        # Especificar o caminho da pasta
+        $pasta = $env:commonPathBot + "\venom_bot"
+
+        # Deletar a pasta e todos os seus conteúdos
+        Remove-Item $pasta -Recurse -Force
+
         Write-Host "Fechando conexões..."
         Write-Host "Liberando recursos..."
         Start-Sleep -Seconds 10

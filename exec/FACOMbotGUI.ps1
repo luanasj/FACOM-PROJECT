@@ -1,3 +1,121 @@
+# Especificar o caminho para o arquivo .env
+$envPath = ".\.env"
+
+# Ler o conteúdo do arquivo .env
+$envContent = Get-Content -Path $envPath
+
+# Percorrer cada linha do arquivo .env
+foreach ($line in $envContent) {
+    # Ignorar linhas que são comentários ou estão vazias
+    if ($line -match '^\s*#' -or [string]::IsNullOrWhiteSpace($line)) {
+        continue
+    }
+
+    # Separar a linha em chave e valor
+    $parts = $line -split '='
+    $key = $parts[0].Trim()
+    $value = $parts[1].Trim()
+
+    # Configurar a variável de ambiente
+    [System.Environment]::SetEnvironmentVariable($key, $value)
+}
+
+
+
+$pyhtonCommand = "-NoExit -Command node $($env:commonPathBot)\venom_bot\venom_bot.js"
+$nodeCommand = "-NoExit -Command python -m flask --app $($env:commonPathBot)\AdaptativeRAG\langchain_bot.py run"
+$logsPath = $env:commonPathBot + "\exec\logs.txt"
+
+# Variáveis globais para os processos
+$global:nodeProcess = $null
+$global:pythonProcess = $null
+
+# Função para iniciar o projeto Node.js
+function Start-NodeProcess {
+    try {
+        Stop-Process -Name "node" -ErrorAction SilentlyContinue #node
+        if ($global:nodeProcess) {
+            Start-Sleep -Seconds 3
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue #powershell
+        }
+        Start-Sleep -Seconds 60
+        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
+        Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
+    } catch {
+        Write-Error "Erro ao iniciar o projeto Node.js: $_"
+        Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+    }
+}
+
+# Função para iniciar o projeto Python
+function Start-PythonProcess {
+    try {
+        while ($true){
+            Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
+            if($global:pythonProcess){
+                Start-Sleep -Seconds 3
+                Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue powershell
+            }
+            Start-Sleep -Seconds 20
+            $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru
+            Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
+            
+            Start-Sleep -Seconds 3600
+        }
+
+    } catch {
+        Write-Error "Erro ao iniciar o projeto Python: $_"
+        Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+    }
+}
+
+
+# Função que será chamada na limpeza
+function Cleanup {
+    Write-Host "`nIniciando operações de limpeza..."
+    
+    try {
+        Write-Host "A execução do script foi interrompida em: $(Get-Date)"
+        if ($global:nodeProcess) {
+            Stop-Process -Name "node" -Force -ErrorAction Stop
+            Start-Sleep -Seconds 3
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        if ($global:pythonProcess) {
+            Stop-Process -Name "python" -Force -ErrorAction Stop
+            Start-Sleep -Seconds 3
+            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
+        }
+        Write-Host "Removendo arquivos temporários..."
+        # Especificar o caminho da pasta
+        $pasta =  "$($env:commonPathBot)\venom_bot"
+        Write-Host $pasta
+
+        # Deletar a pasta e todos os seus conteúdos
+        Remove-Item $pasta -Recurse -Force -ErrorAction SilentlyContinue
+
+        Write-Host "Fechando conexões..."
+        Write-Host "Liberando recursos..."
+        Start-Sleep -Seconds 10
+    }
+    catch {
+        Write-Host "Erro durante a limpeza: $_" -ForegroundColor Red
+        Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+    }
+    finally {
+        Write-Host "Operações de limpeza concluídas" -ForegroundColor Green
+    }
+}
+
+# Registra o manipulador de CTRL+C
+$null = Register-EngineEvent -SourceIdentifier 'PowerShell.Exiting' -Action {
+    Write-Host "`nCTRL+C detectado!"
+    Cleanup
+}
+
+# Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -Action $eventAction
+
+
 #Carregar o assembly do Windows Forms
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -29,16 +147,22 @@ $mainTab.Text = "Início"
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
 $startButton.Text = "Iniciar Bot"
+$startButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$startButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(1/4)))
 $mainTab.Controls.Add($startButton)
 
 #Criando botão para Reiniciar
 $restartButton = New-Object System.Windows.Forms.Button
 $restartButton.Text = "Reiniciar Bot"
+$restartButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$restartButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(2/4)))
 $mainTab.Controls.Add($restartButton)
 
 #Criando botão para Desligar
 $turnOffButton = New-Object System.Windows.Forms.Button
 $turnOffButton.Text = "Desligar Bot"
+$turnOffButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$turnOffButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(3/4)))
 $mainTab.Controls.Add($turnOffButton)
 
 #Criar aba de informações do Menu inicial
@@ -273,15 +397,19 @@ $WebGroupBox.Controls.Add($updateWebButton)
 
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
-
+    Start-NodeProcess
+    Start-PythonProcess
 }
 
 $restartButton.Add_Click{
+    Cleanup
+    Start-NodeProcess
+    Start-PythonProcess
 
 }
 
 $turnOffButton.Add_Click{
-    
+    Cleanup
 }
 
 
@@ -292,6 +420,15 @@ $tabControl.TabPages.Add($tabPage2)
 
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)
+
+$form.add_FormClosing({
+    param([System.Object]$sender, [System.Windows.Forms.FormClosingEventArgs]$e)
+    Write-Host "A janela está prestes a ser fechada."
+    # Você pode cancelar o fechamento da janela configurando $e.Cancel = $true
+    # $e.Cancel = $true
+
+    Cleanup
+})
 
 #Mostrar caixa de diálogo
 $form.ShowDialog()
