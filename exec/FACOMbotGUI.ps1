@@ -21,9 +21,27 @@ $form.StartPosition = "CenterScreen"
 $tabControl = New-Object System.Windows.Forms.TabControl
 $tabControl.Dock = "Fill"
 
-###Criando e Editando Aba 1
+#Criando aba Inicial/Funções báseicas
+$mainTab = New-Object System.Windows.Forms.TabPage
+$mainTab.Text = "Início"
 
-#Criar aba 1
+
+#Criando botão para iniciar programa
+$startButton = New-Object System.Windows.Forms.Button
+$startButton.Text = "Iniciar Bot"
+$mainTab.Controls.Add($startButton)
+
+#Criando botão para Reiniciar
+$restartButton = New-Object System.Windows.Forms.Button
+$restartButton.Text = "Reiniciar Bot"
+$mainTab.Controls.Add($restartButton)
+
+#Criando botão para Desligar
+$turnOffButton = New-Object System.Windows.Forms.Button
+$turnOffButton.Text = "Desligar Bot"
+$mainTab.Controls.Add($turnOffButton)
+
+#Criar aba de informações do Menu inicial
 $tabPage1 = New-Object System.Windows.Forms.TabPage
 $tabPage1.Text = "Menu Info"
 
@@ -152,7 +170,6 @@ $pdfGroupBox.Controls.Add($pdfSectionTitle)
 
 
 #Criando seções para links de pdf
-
 $pdfLinksSection = [System.Collections.ArrayList]::new()
 
 $pdfLinksAmount = 3
@@ -254,7 +271,22 @@ $updateWebButton.Add_Click({
 
 $WebGroupBox.Controls.Add($updateWebButton)
 
+#Adicionando as Funções dos Botões do início
+$startButton.Add_Click{
+
+}
+
+$restartButton.Add_Click{
+
+}
+
+$turnOffButton.Add_Click{
+    
+}
+
+
 #Adicionando Abas ao tab Control
+$tabControl.TabPages.Add($mainTab)
 $tabControl.TabPages.Add($tabPage1)
 $tabControl.TabPages.Add($tabPage2)
 
