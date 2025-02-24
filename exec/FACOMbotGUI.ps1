@@ -8,8 +8,8 @@ $windowHeight = 800
 $horizontalPadding = 10
 $verticalPadding = 10
 $spaceBetween = 20
-$buttonWidth = 80
-$buttonHeight = 20
+$buttonWidth = 200
+$buttonHeight = 30
 
 #Criar um novo formulário
 $form = New-Object System.Windows.Forms.Form
@@ -25,7 +25,7 @@ $tabControl.Dock = "Fill"
 
 #Criar aba 1
 $tabPage1 = New-Object System.Windows.Forms.TabPage
-$tabPage1.Text = "Aba 1"
+$tabPage1.Text = "Menu Info"
 
 #Adicionando Container/GroupBox para segmentar Aba 1
 $box1Width = $form.ClientSize.Width - 2*3 - 2*$horizontalPadding
@@ -49,11 +49,19 @@ $groupBox1.Controls.Add($panel1)
 #Adicionando Linhas
 $menuSection = [System.Collections.ArrayList]::new()
 
+$menuSectionTitle = New-Object System.Windows.Forms.Label
+$menuSectionTitle.Text = "Tópico                                                                     Conteúdo"
+$menuSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
+$menuSectionTitle.Location = New-Object System.Drawing.Point(150,0)
+$menuSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
+$panel1.Controls.Add($menuSectionTitle)
+
+
 for($i=0;$i -lt 8;$i++){
     $descTextHeight = 80
 
     $x = 20
-    $y = $verticalPadding +($descTextHeight + $spaceBetween)*$i
+    $y = $menuSectionTitle.ClientSize.Height + ($descTextHeight + $spaceBetween)*$i
 
     $labelWidth = 15
     $labelHeight = 20
@@ -84,10 +92,9 @@ for($i=0;$i -lt 8;$i++){
     $descText.Padding =New-Object System.Windows.Forms.Padding(0)
     $descText.Margin = New-Object System.Windows.Forms.Padding(0)
     $descText.Size = New-Object System.Drawing.Size($textBoxesWidth,$descTextHeight)
-    $descText.Multiline = $true  # Permitir múltiplas linhas
+    $descText.Multiline = $true  
     $descText.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-    #$descText.ForeColor = [System.Drawing.Color]::Blue 
-    #$descText.BackColor = [System.Drawing.Color]::LightYellow
+
     $panel1.Controls.Add($descText)
 
     $section = @{selector = $menuLabel; title = $titleText; description = $descText}
@@ -95,23 +102,24 @@ for($i=0;$i -lt 8;$i++){
 
 }
 
-$genericButton = New-Object System.Windows.Forms.Button
-$genericButton.Location = New-Object System.Drawing.Point($buttonWidth,($form.ClientSize.Height-50))
-$genericButton.Text = "click_me"
-$genericButton.Add_Click({
+$updateMenuButton = New-Object System.Windows.Forms.Button
+$updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
+$updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$updateMenuButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+$updateMenuButton.Text = "Atualizar Menu"
+$updateMenuButton.Add_Click({
    foreach ($selector in $menuSection) {
     #    Write-Host $selector.description.Text
    }
 })
 
-$tabPage1.Controls.Add($genericButton)
-
+$tabPage1.Controls.Add($updateMenuButton)
 
 ###Criando e Editando Aba 2
 
 #Criar aba 2
 $tabPage2 = New-Object System.Windows.Forms.TabPage
-$tabPage2.Text = "Aba 2"
+$tabPage2.Text = "IA Info"
 
 #Criando Panel 2
 $panel2 = New-Object System.Windows.Forms.Panel
@@ -134,6 +142,15 @@ $pdfGroupBox.Padding = New-Object System.Windows.Forms.Padding(0)
 $pdfGroupBox.Margin = New-Object System.Windows.Forms.Padding(0)
 $panel2.Controls.Add($pdfGroupBox)
 
+#Colocando titulo na sessão de links pdf 
+$pdfSectionTitle = New-Object System.Windows.Forms.Label
+$pdfSectionTitle.Text = "Descrição                                                                         Link"
+$pdfSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
+$pdfSectionTitle.Location = New-Object System.Drawing.Point(150,$verticalPadding)
+$pdfSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
+$pdfGroupBox.Controls.Add($pdfSectionTitle)
+
+
 #Criando seções para links de pdf
 
 $pdfLinksSection = [System.Collections.ArrayList]::new()
@@ -144,7 +161,7 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight -  2*$verticalPadding - ($pdfLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $pdfLinksAmount; $i++){
-    $y = $verticalPadding + 10 + ($linksTextBoxHeight + $spaceBetween)*$i
+    $y = $verticalPadding + $pdfSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
 
     $pdfDesc = New-Object System.Windows.Forms.TextBox
     $pdfDesc.Multiline = $true
@@ -162,6 +179,22 @@ for($i = 0; $i -lt $pdfLinksAmount; $i++){
     
 }
 
+#Criando botão para atualizar pdf links
+
+$updatePdfButton = New-Object System.Windows.Forms.Button
+$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- $verticalPadding))
+$updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+$updatePdfButton.Text = "Atualizar PDFs"
+$updatePdfButton.Add_Click({
+   
+    #    Write-Host $selector.description.Text
+   
+})
+
+$pdfGroupBox.Controls.Add($updatePdfButton)
+
+
 #Group Box para links de artigos do site
 $webGroupBox = New-Object System.Windows.Forms.GroupBox
 $webGroupBox.Text = "Links de Artigos do Site"
@@ -171,8 +204,15 @@ $webGroupBox.Padding = New-Object System.Windows.Forms.Padding(0)
 $webGroupBox.Margin = New-Object System.Windows.Forms.Padding(0)
 $panel2.Controls.Add($webGroupBox)
 
-#Criando seções para links de pdf
+#Colocando titulo na sessão de links web 
+$webSectionTitle = New-Object System.Windows.Forms.Label
+$webSectionTitle.Text = "Descrição                                                                         Link"
+$webSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
+$webSectionTitle.Location = New-Object System.Drawing.Point(150,$verticalPadding)
+$webSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
+$webGroupBox.Controls.Add($webSectionTitle)
 
+#Criando seções para links de pdf
 $webLinksSection = [System.Collections.ArrayList]::new()
 
 $webLinksAmount = 3
@@ -181,7 +221,7 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight - 2*$verticalPadding - ($webLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $webLinksAmount; $i++){
-    $y = $verticalPadding + 10 + ($linksTextBoxHeight + $spaceBetween)*$i
+    $y = $verticalPadding + $webSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
 
     $webDesc = New-Object System.Windows.Forms.TextBox
     $webDesc.Multiline = $true
@@ -198,6 +238,21 @@ for($i = 0; $i -lt $webLinksAmount; $i++){
     [void]$webLinksSection.Add(@{desc = $webDesc; link = $webLink})
     
 }
+
+#Criando botão para atualizar pdf links
+
+$updateWebButton = New-Object System.Windows.Forms.Button
+$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight- $verticalPadding))
+$updateWebButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+$updateWebButton.Text = "Atualizar Artigos Site"
+$updateWebButton.Add_Click({
+   
+    #    Write-Host $selector.description.Text
+   
+})
+
+$WebGroupBox.Controls.Add($updateWebButton)
 
 #Adicionando Abas ao tab Control
 $tabControl.TabPages.Add($tabPage1)
