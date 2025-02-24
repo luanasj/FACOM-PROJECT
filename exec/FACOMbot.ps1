@@ -7,12 +7,12 @@ $global:nodeProcess = $null
 $global:pythonProcess = $null
 
 # Função para iniciar o projeto Node.js
-function Start-NodeProject {
+function Start-NodeProcess {
     try {
-        Stop-Process -Name "node" -ErrorAction SilentlyContinue
+        Stop-Process -Name "node" -ErrorAction SilentlyContinue #node
         if ($global:nodeProcess) {
             Start-Sleep -Seconds 3
-            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
+            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue #powershell
         }
         Start-Sleep -Seconds 60
         $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
@@ -23,12 +23,12 @@ function Start-NodeProject {
 }
 
 # Função para iniciar o projeto Python
-function Start-PythonProject {
+function Start-PythonProcess {
     try {
-        Stop-Process -Name "python" -ErrorAction SilentlyContinue
+        Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
         if($global:pythonProcess){
             Start-Sleep -Seconds 3
-            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
+            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue powershell
         }
         Start-Sleep -Seconds 20
         $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru
@@ -73,27 +73,57 @@ $null = Register-EngineEvent -SourceIdentifier 'PowerShell.Exiting' -Action {
     Cleanup
 }
 
-try {
-    Write-Host "Script iniciado. Pressione CTRL+C para encerrar..."
+$global:keepActive = $true
+
+function Process-Loop {
+    try {
+        Write-Host "Script iniciado. Pressione CTRL+C para encerrar..."
+        
+        # Seu código principal aqui
+        while ($($global:keepActive)) {
+            # Start-NodeProcess
+            Start-PythonProcess #será que precisa?
     
-    # Seu código principal aqui
-    while ($true) {
-        Start-NodeProject
-        Start-PythonProject
-
-        # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
-        Start-Sleep -Seconds 1200
-
-        # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
-        Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+            # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
+            Start-Sleep -Seconds 3600
+    
+            # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
+            Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+        }
     }
+    catch {
+        Write-Host "`nErro não esperado: $_" -ForegroundColor Red
+    }
+    finally {
+        # Esta parte SEMPRE será executada, mesmo com CTRL+C
+        Cleanup
+        # Limpa o evento registrado
+        Get-EventSubscriber | Where-Object SourceIdentifier -eq 'PowerShell.Exiting' | Unregister-Event
+    }
+    
 }
-catch {
-    Write-Host "`nErro não esperado: $_" -ForegroundColor Red
-}
-finally {
-    # Esta parte SEMPRE será executada, mesmo com CTRL+C
-    Cleanup
-    # Limpa o evento registrado
-    Get-EventSubscriber | Where-Object SourceIdentifier -eq 'PowerShell.Exiting' | Unregister-Event
-}
+
+# try {
+#     Write-Host "Script iniciado. Pressione CTRL+C para encerrar..."
+    
+#     # Seu código principal aqui
+#     while ($true) {
+#         Start-NodeProcess
+#         Start-PythonProcess
+
+#         # Aguarde 1 hora antes de reiniciar os projetos (3600 segundos)
+#         Start-Sleep -Seconds 1200
+
+#         # Opcionalmente, você pode adicionar um log para verificar quando os projetos são reiniciados
+#         Add-Content -Path $logsPath -Value "Projetos reiniciados em: $(Get-Date)"
+#     }
+# }
+# catch {
+#     Write-Host "`nErro não esperado: $_" -ForegroundColor Red
+# }
+# finally {
+#     # Esta parte SEMPRE será executada, mesmo com CTRL+C
+#     Cleanup
+#     # Limpa o evento registrado
+#     Get-EventSubscriber | Where-Object SourceIdentifier -eq 'PowerShell.Exiting' | Unregister-Event
+# }

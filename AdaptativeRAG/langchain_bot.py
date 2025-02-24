@@ -73,7 +73,7 @@ workflow.add_conditional_edges(
     "grade_documents",
     decide_to_generate,
     {
-        "transform_query": "transform_query",
+        "transform_query": "web_search",
         "generate": "generate",
     },
 )

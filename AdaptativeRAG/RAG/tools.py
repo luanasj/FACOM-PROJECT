@@ -45,7 +45,9 @@ vectorstore = Chroma.from_documents(
     embedding=embd,
 )
 
-retriever = vectorstore.as_retriever()
+retriever = vectorstore.as_retriever(
+    search_kwargs={'k': 7}
+)
 
 # Get vectorstoreContent
 
@@ -54,7 +56,7 @@ vectorstoreContent = getVectorStoreContent(urls)
 from langchain_community.tools.tavily_search import TavilySearchResults
 
 web_search_tool = TavilySearchResults(
-    max_results=3,
+    max_results=5,
     search_depth="advanced",
     include_answer=True,
     include_raw_content=True,
