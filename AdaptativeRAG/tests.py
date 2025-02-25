@@ -1,19 +1,16 @@
-import glob
 import os
+import json
+from dotenv import load_dotenv
+load_dotenv()
 
-tempFolderPath = r'C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\temp\*'
 
-arquivos = glob.glob(tempFolderPath)
+print(os.getenv("commonPathBot"))
+print(os.getenv("commonPathBot")+"\\externalLinks.json")
 
-for arquivo in arquivos:
-    try:
-        os.remove(arquivo)
-        print(f'{arquivo} foi excluído com sucesso.')
-    except Exception as e:
-        print(f'Erro ao excluir {arquivo}: {e}')
+with open(os.getenv("commonPathBot")+"\\externalLinks.json") as file:
+    externalLinks = json.load(file)
 
-print(arquivos)
-
+print(externalLinks)
 
 
 

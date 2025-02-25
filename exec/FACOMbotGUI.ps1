@@ -310,9 +310,9 @@ $panel2.Controls.Add($pdfGroupBox)
 
 #Colocando titulo na sessão de links pdf 
 $pdfSectionTitle = New-Object System.Windows.Forms.Label
-$pdfSectionTitle.Text = "Descrição                                                                         Link"
+$pdfSectionTitle.Text = "Título(Sem Espaços)                                                                   Link"
 $pdfSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
-$pdfSectionTitle.Location = New-Object System.Drawing.Point(150,$verticalPadding)
+$pdfSectionTitle.Location = New-Object System.Drawing.Point(100,$verticalPadding)
 $pdfSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
 $pdfGroupBox.Controls.Add($pdfSectionTitle)
 
@@ -326,21 +326,35 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight -  2*$verticalPadding - ($pdfLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $pdfLinksAmount; $i++){
+    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+
+    $jsonContent = Get-Content -Path $jsonPath -Raw 
+    
+    $dados = $jsonContent | ConvertFrom-Json 
+
+    $pdfs = $dados.pdfs
+
     $y = $verticalPadding + $pdfSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
 
     $pdfDesc = New-Object System.Windows.Forms.TextBox
     $pdfDesc.Multiline = $true
+    if($i -lt $pdfs.Count){
+        $pdfDesc.Text = pdfs[$i].title
+    }
     $pdfDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $pdfDesc.Location = New-Object System.Drawing.Point($horizontalPadding, $y)
     $pdfGroupBox.Controls.Add($pdfDesc)
 
     $pdfLink = New-Object System.Windows.Forms.TextBox
     $pdfLink.Multiline = $true
+    if($i -lt $pdfs.Count){
+        $pdfLink.Text = pdfs[$i].link
+    }
     $pdfLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $pdfLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
     $pdfGroupBox.Controls.Add($pdfLink)
 
-    [void]$pdfLinksSection.Add(@{desc = $pdfDesc; link = $pdfLink})
+    [void]$pdfLinksSection.Add(@{title = $pdfDesc; link = $pdfLink})
     
 }
 
@@ -352,7 +366,26 @@ $updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeigh
 $updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updatePdfButton.Text = "Atualizar PDFs"
 $updatePdfButton.Add_Click({
-   
+    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+
+    $jsonContent = Get-Content -Path $jsonPath -Raw 
+    
+    $dados = $jsonContent | ConvertFrom-Json 
+
+    $novosDados = [System.Collections.ArrayList]::new()
+
+    foreach($pdf in $pdfLinksSection){
+        if($pdf.title.Text -and $pdf.link.Text){
+            $novosDados.Add(@{title = $pdf.title.Text; link = $pdf.link.Text})
+        }
+    }
+
+    $dados.pdfs = $novosDados
+
+    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
+
+    Set-Content -Path $jsonPath -Value $jsonAtualizado
+
     #    Write-Host $selector.description.Text
    
 })
@@ -386,16 +419,30 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight - 2*$verticalPadding - ($webLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $webLinksAmount; $i++){
+    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+
+    $jsonContent = Get-Content -Path $jsonPath -Raw 
+    
+    $dados = $jsonContent | ConvertFrom-Json 
+
+    $webInfo = $dados.web
+
     $y = $verticalPadding + $webSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
 
     $webDesc = New-Object System.Windows.Forms.TextBox
     $webDesc.Multiline = $true
+    if($i -lt $pdfs.Count){
+        $webDesc.Text = $webInfo[$i].description
+    }
     $webDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $webDesc.Location = New-Object System.Drawing.Point($horizontalPadding, $y)
     $webGroupBox.Controls.Add($webDesc)
 
     $webLink = New-Object System.Windows.Forms.TextBox
     $webLink.Multiline = $true
+    if($i -lt $pdfs.Count){
+        $webLink.Text = $webLink[$i].link
+    }
     $webLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $webLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
     $webGroupBox.Controls.Add($webLink)
@@ -412,9 +459,27 @@ $updateWebButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeigh
 $updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateWebButton.Text = "Atualizar Artigos Site"
 $updateWebButton.Add_Click({
-   
-    #    Write-Host $selector.description.Text
-   
+
+    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+
+    $jsonContent = Get-Content -Path $jsonPath -Raw 
+    
+    $dados = $jsonContent | ConvertFrom-Json 
+
+    $novosDados = [System.Collections.ArrayList]::new()
+
+    foreach($article in $webLinksSection){
+        if($article.title.Text -and $article.link.Text){
+            $novosDados.Add(@{title = $article.title.Text; link = $article.link.Text})
+        }
+    }
+
+    $dados.web = $novosDados
+
+    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
+
+    Set-Content -Path $jsonPath -Value $jsonAtualizado
+
 })
 
 $WebGroupBox.Controls.Add($updateWebButton)
