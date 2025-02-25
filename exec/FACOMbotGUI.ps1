@@ -191,6 +191,7 @@ $groupBox1.Controls.Add($panel1)
 #Adicionando Linhas
 $menuSection = [System.Collections.ArrayList]::new()
 
+
 $menuSectionTitle = New-Object System.Windows.Forms.Label
 $menuSectionTitle.Text = "Tópico                                                                     Conteúdo"
 $menuSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
@@ -200,6 +201,13 @@ $panel1.Controls.Add($menuSectionTitle)
 
 
 for($i=0;$i -lt 8;$i++){
+    $caminhoJSON = "$($env:commonPathBot)\externalInfo.json"
+
+    $jsonContent = Get-Content -Path $caminhoJSON -Raw
+
+    $dados = $jsonContent | ConvertFrom-Json
+
+
     $descTextHeight = 80
 
     $x = 20
@@ -211,7 +219,6 @@ for($i=0;$i -lt 8;$i++){
     $menuLabel.Text = $i+1
     $menuLabel.Padding = New-Object System.Windows.Forms.Padding(0)
     $menuLabel.Margin = New-Object System.Windows.Forms.Padding(0)
-
     $menuLabel.Location = New-Object System.Drawing.Point(0,$y)
     $menuLabel.Size = New-Object System.Drawing.Size($labelWidth,$labelHeight)
     $panel1.Controls.Add($menuLabel)
@@ -221,6 +228,9 @@ for($i=0;$i -lt 8;$i++){
     $titleTextX = $labelWidth + $spaceBetween
     $titleText = New-Object System.Windows.Forms.TextBox
     $titleText.Location = New-Object System.Drawing.Point($titleTextX,$y)
+    if($i -lt $dados.Count){
+        $titleText.Text = $dados[$i].name
+    }
     $titleText.Margin = New-Object System.Windows.Forms.Padding(0)
     $titleText.Padding = New-Object System.Windows.Forms.Padding(0)
     $titleText.Size = New-Object System.Drawing.Size($textBoxesWidth,25)
@@ -231,6 +241,9 @@ for($i=0;$i -lt 8;$i++){
     $descTextX = $titleTextX + $textBoxesWidth + $spaceBetween
     $descText = New-Object System.Windows.Forms.TextBox
     $descText.Location = New-Object System.Drawing.Point($descTextX,$y)
+    if($i -lt $dados.Count){
+        $descText.Text = $dados[$i].description
+    }
     $descText.Padding =New-Object System.Windows.Forms.Padding(0)
     $descText.Margin = New-Object System.Windows.Forms.Padding(0)
     $descText.Size = New-Object System.Drawing.Size($textBoxesWidth,$descTextHeight)
@@ -250,9 +263,20 @@ $updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeig
 $updateMenuButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateMenuButton.Text = "Atualizar Menu"
 $updateMenuButton.Add_Click({
-   foreach ($selector in $menuSection) {
+    $caminhoJSON = "$($env:commonPathBot)\externalInfo.json"
+
+    $dados = [System.Collections.ArrayList]::new()
+
+    foreach ($selector in $menuSection) {
+       if($selector.title.Text -and $selector.description.Text){
+           [void]$dados.Add(@{name = selector.title.Text; description = $selector.description.Text})
+       }
     #    Write-Host $selector.description.Text
    }
+
+   $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
+
+   Set-Content -Path $caminhoJson -Value $jsonAtualizado
 })
 
 $tabPage1.Controls.Add($updateMenuButton)
