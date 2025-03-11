@@ -151,6 +151,14 @@ $mainTabTitle.AutoSize = $true
 $mainTab.Controls.Add($mainTabTitle)
 $mainTabTitle.Location = New-Object System.Drawing.Point((($windowWidth - $mainTabTitle.ClientSize.Width)/2),$verticalPadding)
 
+#Criando Status do Painel de Controle/Aba Principal
+$mainTabStatus = New-Object System.Windows.Forms.Label
+$mainTabStatus.Text = "Por favor, inicie o sistema."
+$mainTabStatus.Size = New-Object System.Drawing.Size($windowWidth, 20)
+$mainTabStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$mainTabStatus.Location = New-Object System.Drawing.Point(0,($verticalPadding+$spaceBetween+$mainTabTitle.ClientSize.Height))
+$mainTab.Controls.Add($mainTabStatus)
+
 
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
@@ -492,10 +500,30 @@ $updateWebButton.Add_Click({
 
 $WebGroupBox.Controls.Add($updateWebButton)
 
+function Update-Status {
+
+    while ($true) {
+        Start-Sleep -Seconds 300
+        Get-Process -Name "node" -ErrorAction Stop
+        Get-Process -Name "python" -ErrorAction Stop
+        $mainTabStatus.Text = "O chatBot está ativo"
+    }
+
+}
+
+
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
     Start-NodeProcess
-    Start-PythonProcess
+    Start-PythonProcess 
+
+    try {
+        Update-Status
+    }
+    catch {
+        $mainTabStatus.Text = "Iniciando chatBot"
+    }
+
 }
 
 $restartButton.Add_Click{
@@ -503,10 +531,20 @@ $restartButton.Add_Click{
     Start-NodeProcess
     Start-PythonProcess
 
+    $mainTabStatus.Text = "Reiniciando..."
+
+    try {
+        Update-Status
+    }
+    catch {
+        $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
+    }
+
 }
 
 $turnOffButton.Add_Click{
     Cleanup
+    $mainTabStatus.Text = "Processo finalizado"
 }
 
 
