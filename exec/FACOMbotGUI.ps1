@@ -143,6 +143,14 @@ $tabControl.Dock = "Fill"
 $mainTab = New-Object System.Windows.Forms.TabPage
 $mainTab.Text = "Início"
 
+#Criando título da aba Principal
+$mainTabTitle = New-Object System.Windows.Forms.Label
+$mainTabTitle.Text = "Painel de Controle"
+$mainTabTitle.Font = New-Object System.Drawing.Font("Arial", 15, [System.Drawing.FontStyle]::Bold)
+$mainTabTitle.AutoSize = $true
+$mainTab.Controls.Add($mainTabTitle)
+$mainTabTitle.Location = New-Object System.Drawing.Point((($windowWidth - $mainTabTitle.ClientSize.Width)/2),$verticalPadding)
+
 
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
@@ -339,7 +347,7 @@ for($i = 0; $i -lt $pdfLinksAmount; $i++){
     $pdfDesc = New-Object System.Windows.Forms.TextBox
     $pdfDesc.Multiline = $true
     if($i -lt $pdfs.Count){
-        $pdfDesc.Text = pdfs[$i].title
+        $pdfDesc.Text = $pdfs[$i].title
     }
     $pdfDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $pdfDesc.Location = New-Object System.Drawing.Point($horizontalPadding, $y)
@@ -348,7 +356,7 @@ for($i = 0; $i -lt $pdfLinksAmount; $i++){
     $pdfLink = New-Object System.Windows.Forms.TextBox
     $pdfLink.Multiline = $true
     if($i -lt $pdfs.Count){
-        $pdfLink.Text = pdfs[$i].link
+        $pdfLink.Text = $pdfs[$i].link
     }
     $pdfLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $pdfLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
@@ -431,7 +439,7 @@ for($i = 0; $i -lt $webLinksAmount; $i++){
 
     $webDesc = New-Object System.Windows.Forms.TextBox
     $webDesc.Multiline = $true
-    if($i -lt $pdfs.Count){
+    if($i -lt $webInfo.Count){
         $webDesc.Text = $webInfo[$i].description
     }
     $webDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
@@ -440,8 +448,8 @@ for($i = 0; $i -lt $webLinksAmount; $i++){
 
     $webLink = New-Object System.Windows.Forms.TextBox
     $webLink.Multiline = $true
-    if($i -lt $pdfs.Count){
-        $webLink.Text = $webLink[$i].link
+    if($i -lt $webInfo.Count){
+        $webLink.Text = $webInfo[$i].link
     }
     $webLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
     $webLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
