@@ -51,7 +51,7 @@ workflow.add_node("web_search", web_search)  # web search
 workflow.add_node("retrieve", retrieve)  # retrieve
 workflow.add_node("grade_documents", grade_documents)  # grade documents
 workflow.add_node("generate", generate)  # generatae
-workflow.add_node("transform_query", transform_query)  # transform_query
+# workflow.add_node("transform_query", transform_query)  # transform_query
 workflow.add_node("generate_without_rag", generate_without_rag) # route to rag or retrieve
 
 # Build graph
@@ -77,7 +77,7 @@ workflow.add_conditional_edges(
         "generate": "generate",
     },
 )
-workflow.add_edge("transform_query", "retrieve")
+# workflow.add_edge("transform_query", "retrieve")
 
 workflow.add_edge("generate",END)
 
@@ -102,6 +102,7 @@ def sigint_handler(sig, frame):
 
 # Run
 
+from asgiref.wsgi import WsgiToAsgi
 from flask import Flask,request
 from markupsafe import escape
 
@@ -123,6 +124,25 @@ def hello(messageid):
         print(e)
         return "tive um problema processando a sua pergunta. Por favor, tente novamente."
 
+# from fastapi import FastAPI
+
+# app = FastAPI()
+
+# @app.get("/")
+# def read_root():
+#     return {"message":"hello world"}
+
+# @app.post("/aimessage/{messageid}")
+
+
+asgi_app = WsgiToAsgi(app)
+
 signal.signal(signal.SIGINT, sigint_handler)
 
 #gitfile run
+
+#python -m flask --app langchain_bot run
+
+#uvicorn --app-dir "C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG" langchain_bot:asgi_app --host 127.0.0.1 --port 8000 --workers 4 --reload 
+
+#git restore --source d90fbd7cbd9afa8c96db1e52a8854c9c1a920ec7 --staged --worktree venom_bot
