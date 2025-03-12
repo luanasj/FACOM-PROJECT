@@ -165,6 +165,7 @@ $startButton = New-Object System.Windows.Forms.Button
 $startButton.Text = "Iniciar Bot"
 $startButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $startButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(1/4)))
+$startButton.BackColor = [System.Drawing.Color]::FromArgb(255, 204,255,153) # Alfa, Vermelho, Verde, Azul
 $mainTab.Controls.Add($startButton)
 
 #Criando botão para Reiniciar
@@ -172,6 +173,7 @@ $restartButton = New-Object System.Windows.Forms.Button
 $restartButton.Text = "Reiniciar Bot"
 $restartButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $restartButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(2/4)))
+$restartButton.BackColor = [System.Drawing.Color]::FromArgb(255, 255,255,74)
 $mainTab.Controls.Add($restartButton)
 
 #Criando botão para Desligar
@@ -179,6 +181,7 @@ $turnOffButton = New-Object System.Windows.Forms.Button
 $turnOffButton.Text = "Desligar Bot"
 $turnOffButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $turnOffButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(3/4)))
+$turnOffButton.BackColor = [System.Drawing.Color]::FromArgb(255, 255,50,43)
 $mainTab.Controls.Add($turnOffButton)
 
 #Criar aba de informações do Menu inicial
