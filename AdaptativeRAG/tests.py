@@ -5,9 +5,9 @@ load_dotenv()
 
 
 print(os.getenv("commonPathBot"))
-print(os.getenv("commonPathBot")+"\\externalLinks.json")
+print(os.getenv("commonPathBot")+"\\assets\\externalLinks.json")
 
-with open(os.getenv("commonPathBot")+"\\externalLinks.json") as file:
+with open(os.getenv("commonPathBot")+"\\assets\\externalLinks.json") as file:
     externalLinks = json.load(file)
 
 print(externalLinks)

@@ -6,6 +6,24 @@ $logsPath = $env:commonPathBot + "\exec\logs.txt"
 $global:nodeProcess = $null
 $global:pythonProcess = $null
 
+# # Criar e configurar um runspace
+# $runspace = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
+# $runspace.Open()
+
+# # Criar um pipeline de comandos para o runspace
+# $pipeline = $runspace.CreatePipeline()
+# $pipeline.Commands.AddScript({
+#     # Código que será executado no runspace
+#     Start-Sleep -Seconds 5
+#     Write-Output "Runspace finalizado!"
+# })
+
+# # Executar o código no runspace
+# $pipeline.Invoke()
+
+# # Fechar o runspace
+# $runspace.Close()
+
 
 #Função para parar projeto Node js
 function Stop-NodeProcess {
@@ -13,6 +31,7 @@ function Stop-NodeProcess {
     if ($global:nodeProcess) {
         Start-Sleep -Seconds 3
         Stop-Process -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue #powershell
+        $global:nodeProcess = $null
     }
 }
 
@@ -39,8 +58,6 @@ function Stop-PythonProcess {
         Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue #powershell
     }
 }
-
-
 
 
 # Função para iniciar o projeto Python

@@ -1,4 +1,4 @@
-import dados from '../externalInfo.json' assert { type: 'json' };
+import dados from '../assets/externalInfo.json' assert { type: 'json' };
 
 const selectorStore = dados
 

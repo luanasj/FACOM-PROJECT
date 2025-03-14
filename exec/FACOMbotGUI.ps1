@@ -236,7 +236,7 @@ $panel1.Controls.Add($menuSectionTitle)
 
 
 for($i=0;$i -lt 8;$i++){
-    $caminhoJSON = "$($env:commonPathBot)\externalInfo.json"
+    $caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
 
     $jsonContent = Get-Content -Path $caminhoJSON -Raw
 
@@ -298,7 +298,7 @@ $updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeig
 $updateMenuButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateMenuButton.Text = "Atualizar Menu"
 $updateMenuButton.Add_Click({
-    $caminhoJSON = "$($env:commonPathBot)\externalInfo.json"
+    $caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
 
     $dados = [System.Collections.ArrayList]::new()
 
@@ -361,7 +361,7 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight -  2*$verticalPadding - ($pdfLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $pdfLinksAmount; $i++){
-    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
 
     $jsonContent = Get-Content -Path $jsonPath -Raw 
     
@@ -401,7 +401,7 @@ $updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeigh
 $updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updatePdfButton.Text = "Atualizar PDFs"
 $updatePdfButton.Add_Click({
-    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
 
     $jsonContent = Get-Content -Path $jsonPath -Raw 
     
@@ -454,7 +454,7 @@ $linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
 $linksTextBoxHeight = ($linksBoxHeight - 2*$verticalPadding - ($webLinksAmount-1)*$spaceBetween)/5
 
 for($i = 0; $i -lt $webLinksAmount; $i++){
-    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
 
     $jsonContent = Get-Content -Path $jsonPath -Raw 
     
@@ -495,7 +495,7 @@ $updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Draw
 $updateWebButton.Text = "Atualizar Artigos Site"
 $updateWebButton.Add_Click({
 
-    $jsonPath = "$($env:commonPathBot)\externalLinks.json"
+    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
 
     $jsonContent = Get-Content -Path $jsonPath -Raw 
     
@@ -554,19 +554,12 @@ $restartButton.Add_Click{
     Start-NodeProcess
     Start-PythonProcess
 
-    # $mainTabStatus.Text = "Reiniciando..."
-
-    # try {
-    #     Update-Status
-    # }
-    # catch {
-    #     $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
-    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
-    # }
+    $mainTabStatus.Text = "Reiniciando..."
 
 }
 
 $turnOffButton.Add_Click{
+    $mainTabStatus.Text = "Desativando Chatbot, por favor aguarde um momento"
     Cleanup
     $mainTabStatus.Text = "Processo finalizado"
 }
@@ -580,10 +573,10 @@ $tabControl.TabPages.Add($tabPage2)
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)
 
-$timer = New-Object System.Timers.Timer
-$timer.Interval = 300 * 1000 #300seg * 1000, ou seja 5 minutos em milisegundos
-$timer.AutoReset = $true
-$timer.add_Elapsed({
+$botStatusChecktimer = New-Object System.Timers.Timer
+$botStatusChecktimer.Interval = 300 * 1000 #300seg * 1000, ou seja 5 minutos em milisegundos
+$botStatusChecktimer.AutoReset = $true
+$botStatusChecktimer.add_Elapsed({
     $mainTabStatus.Text = Update-Status
 })
 
@@ -594,7 +587,7 @@ $form.add_FormClosing({
     
     # Você pode cancelar o fechamento da janela configurando $e.Cancel = $true
     # $e.Cancel = $true
-    $timer.Stop()
+    $botStatusChecktimer.Stop()
     Cleanup
 
 })
@@ -602,9 +595,7 @@ $form.add_FormClosing({
 #Mostrar caixa de diálogo
 $form.ShowDialog()
 
-while($global:checkProcessStatus){
-    Update-Status
-}
+
 
 
 

@@ -165,7 +165,7 @@ from agents.utils import getSelectorsFromJSON
 
 # Prompt
 
-JSONpath = os.getenv("commonPathBot")+"\\externalInfo.json"
+JSONpath = os.getenv("commonPathBot")+"\\assets\\externalInfo.json"
 
 no_rag_prompt = ChatPromptTemplate.from_messages(
     [(
