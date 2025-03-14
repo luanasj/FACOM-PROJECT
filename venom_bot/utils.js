@@ -1,22 +1,18 @@
-class WppCounter{
-    // sendMessage;
+import dados from '../assets/utilInfo.json' assert {type:'json'}
 
-    constructor(seconds,client,FACOMnumber){
+console.log(dados)
+
+class WppCounter{
+    FACOMnumber = dados.phoneNumber
+
+    constructor(seconds,client){
         // this.sendMessage = false;
 
         setInterval(() => {
             // this.setSendMessage(false);
-            client.sendText(`${FACOMnumber}@c.us`,"Confirmação de atividade")
+            client.sendText(`${this.FACOMnumber}@c.us`,"Confirmação de atividade")
         }, seconds*1000);
     }
-
-    // setSendMessage(bool){
-    //     this.sendMessage = bool
-    // }
-
-    // getSendMessage(){
-    //     return this.sendMessage
-    // }
 
 }
 

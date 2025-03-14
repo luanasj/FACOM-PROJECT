@@ -2,18 +2,11 @@ import venom from 'venom-bot'
 import {tradeMessageWithChatbot,answerToMedia} from "./messagesFlow.js"
 import WppCounter from "./utils.js"
 
-// const counter = new WppCounter(180);
-
 
 function start(client) {
-  
 
-  // if(counter.getSendMessage()){
-  //   counter.setSendMessage(false);
-  //   client.sendText(`${FACOMnumber}@c.us`,"Confirmação de atividade");
-  // }
-  const FACOMnumber = "5511947270112"
-  const counter = new WppCounter(180,client,FACOMnumber);
+  
+  const counter = new WppCounter(180,client);
 
   //Se comunica com o chatbot
   client.onMessage(async (message) => {
