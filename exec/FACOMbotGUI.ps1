@@ -20,26 +20,31 @@ foreach ($line in $envContent) {
     [System.Environment]::SetEnvironmentVariable($key, $value)
 }
 
-
-
-$pyhtonCommand = "-NoExit -Command node $($env:commonPathBot)\venom_bot\venom_bot.js"
-$nodeCommand = "-NoExit -Command python -m flask --app $($env:commonPathBot)\AdaptativeRAG\langchain_bot.py run"
+$nodeCommand = "-NoExit -Command `"Set-Location $($env:commonPathBot)\venom_bot; node venom_bot.js`""
+$pyhtonCommand = "-NoExit -Command uvicorn --app-dir $($env:commonPathBot)\AdaptativeRAG langchain_bot:asgi_app --host 127.0.0.1 --port 5000 --workers 4 --reload"
 $logsPath = $env:commonPathBot + "\exec\logs.txt"
 
 # Variáveis globais para os processos
 $global:nodeProcess = $null
 $global:pythonProcess = $null
 
+#Função para parar projeto Node js
+function Stop-NodeProcess {
+    Stop-Process -Name "node" -ErrorAction SilentlyContinue #node
+    if ($global:nodeProcess) {
+        Start-Sleep -Seconds 3
+        Stop-Process -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue #powershell
+    }
+}
+
 # Função para iniciar o projeto Node.js
 function Start-NodeProcess {
+    Stop-NodeProcess
+
     try {
-        Stop-Process -Name "node" -ErrorAction SilentlyContinue #node
-        if ($global:nodeProcess) {
-            Start-Sleep -Seconds 3
-            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue #powershell
-        }
-        Start-Sleep -Seconds 60
-        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru
+        Start-Sleep -Seconds 20
+        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -PassThru -ErrorAction Stop
+
         Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
         Write-Error "Erro ao iniciar o projeto Node.js: $_"
@@ -47,22 +52,24 @@ function Start-NodeProcess {
     }
 }
 
+#Função para parar o Processo Python
+function Stop-PythonProcess {
+    Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
+    if($global:pythonProcess){
+        Start-Sleep -Seconds 3
+        Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue #powershell
+    }
+}
+
 # Função para iniciar o projeto Python
 function Start-PythonProcess {
+    Stop-PythonProcess
     try {
-        while ($true){
-            Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
-            if($global:pythonProcess){
-                Start-Sleep -Seconds 3
-                Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue powershell
-            }
-            Start-Sleep -Seconds 20
-            $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru
-            Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
-            
-            Start-Sleep -Seconds 3600
-        }
+        Start-Sleep -Seconds 10
 
+        $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -PassThru -ErrorAction Stop
+
+        Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
     } catch {
         Write-Error "Erro ao iniciar o projeto Python: $_"
         Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
@@ -76,19 +83,13 @@ function Cleanup {
     
     try {
         Write-Host "A execução do script foi interrompida em: $(Get-Date)"
-        if ($global:nodeProcess) {
-            Stop-Process -Name "node" -Force -ErrorAction Stop
-            Start-Sleep -Seconds 3
-            Stop-Process  -Id $global:nodeProcess.Id -Force -ErrorAction SilentlyContinue 
-        }
-        if ($global:pythonProcess) {
-            Stop-Process -Name "python" -Force -ErrorAction Stop
-            Start-Sleep -Seconds 3
-            Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue 
-        }
+        
+        Stop-NodeProcess
+        Stop-PythonProcess
+
         Write-Host "Removendo arquivos temporários..."
         # Especificar o caminho da pasta
-        $pasta =  "$($env:commonPathBot)\venom_bot"
+        $pasta =  "$($env:commonPathBot)\venom_bot\tokens"
         Write-Host $pasta
 
         # Deletar a pasta e todos os seus conteúdos
@@ -105,6 +106,21 @@ function Cleanup {
     finally {
         Write-Host "Operações de limpeza concluídas" -ForegroundColor Green
     }
+}
+
+# $global:checkProcessStatus = $true
+function Update-Status {
+
+    try {
+       Get-Process -Name "python" -ErrorAction Stop
+       Get-Process -Name "node" -ErrorAction Stop
+
+       return "Chatbot: Processos ativos."
+    }
+    catch {
+        return "Por favor inicie o chatbot"
+    }
+
 }
 
 # Registra o manipulador de CTRL+C
@@ -503,16 +519,16 @@ $updateWebButton.Add_Click({
 
 $WebGroupBox.Controls.Add($updateWebButton)
 
-function Update-Status {
+# function Update-Status {
 
-    while ($true) {
-        Start-Sleep -Seconds 300
-        Get-Process -Name "node" -ErrorAction Stop
-        Get-Process -Name "python" -ErrorAction Stop
-        $mainTabStatus.Text = "O chatBot está ativo"
-    }
+#     while ($true) {
+#         Start-Sleep -Seconds 300
+#         Get-Process -Name "node" -ErrorAction Stop
+#         Get-Process -Name "python" -ErrorAction Stop
+#         $mainTabStatus.Text = "O chatBot está ativo"
+#     }
 
-}
+# }
 
 
 #Adicionando as Funções dos Botões do início
@@ -520,13 +536,17 @@ $startButton.Add_Click{
     Start-NodeProcess
     Start-PythonProcess 
 
-    try {
-        Update-Status
-    }
-    catch {
-        $mainTabStatus.Text = "Iniciando chatBot"
-    }
+    $mainTabStatus.Text = "Iniciando chatBot"
 
+    # try {
+    #     Update-Status
+    # }
+    # catch {
+    #     $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
+    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+
+
+    # }
 }
 
 $restartButton.Add_Click{
@@ -534,14 +554,15 @@ $restartButton.Add_Click{
     Start-NodeProcess
     Start-PythonProcess
 
-    $mainTabStatus.Text = "Reiniciando..."
+    # $mainTabStatus.Text = "Reiniciando..."
 
-    try {
-        Update-Status
-    }
-    catch {
-        $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
-    }
+    # try {
+    #     Update-Status
+    # }
+    # catch {
+    #     $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
+    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+    # }
 
 }
 
@@ -559,16 +580,32 @@ $tabControl.TabPages.Add($tabPage2)
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)
 
+$timer = New-Object System.Timers.Timer
+$timer.Interval = 300 * 1000 #300seg * 1000, ou seja 5 minutos em milisegundos
+$timer.AutoReset = $true
+$timer.add_Elapsed({
+    $mainTabStatus.Text = Update-Status
+})
+
 $form.add_FormClosing({
     param([System.Object]$sender, [System.Windows.Forms.FormClosingEventArgs]$e)
+    
     Write-Host "A janela está prestes a ser fechada."
+    
     # Você pode cancelar o fechamento da janela configurando $e.Cancel = $true
     # $e.Cancel = $true
-
+    $timer.Stop()
     Cleanup
+
 })
 
 #Mostrar caixa de diálogo
 $form.ShowDialog()
+
+while($global:checkProcessStatus){
+    Update-Status
+}
+
+
 
 

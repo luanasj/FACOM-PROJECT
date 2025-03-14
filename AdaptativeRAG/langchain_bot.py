@@ -144,5 +144,3 @@ signal.signal(signal.SIGINT, sigint_handler)
 #python -m flask --app langchain_bot run
 
 #uvicorn --app-dir "C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents\AdaptativeRAG" langchain_bot:asgi_app --host 127.0.0.1 --port 8000 --workers 4 --reload 
-
-#git restore --source d90fbd7cbd9afa8c96db1e52a8854c9c1a920ec7 --staged --worktree venom_bot
