@@ -187,21 +187,48 @@ $phoneNumber.Text = $utilInfoContent.phoneNumber
 $phoneNumber.Size = New-Object System.Drawing.Size(200,20)
 $mainTab.Controls.Add($phoneNumber)
 
-
 #Criando Label para telefone
 $phoneNumberLabel = New-Object System.Windows.Forms.Label
-$phoneNumberLabel.Text = "Celular"
+$phoneNumberLabel.Text = "Celular:"
+$phoneNumberLabel.AutoSize = $true
 $phoneNumberLabel.Font = New-Object System.Drawing.Font("Arial",10,[System.Drawing.FontStyle]::Bold)
 $mainTab.Controls.Add($phoneNumberLabel)
 
+#Criando Caixa de Texto para sinalizar erro
+$invalidNumberWarning = New-Object System.Windows.Forms.Label
+$invalidNumberWarning.ForeColor = [System.Drawing.Color]::Red
+$invalidNumberWarning.Text = ""
+$invalidNumberWarning.Font = New-Object System.Drawing.Font("Arial",8)
+$invalidNumberWarning.AutoSize = $true
+$mainTab.Controls.Add($invalidNumberWarning)
+
+#Criando botão para atualizar número de celular
+$phoneNumberUpdateBtn = New-Object System.Windows.Forms.Button
+$phoneNumberUpdateBtn.Text = "Atualizar"
+$phoneNumberUpdateBtn.AutoSize = $true
+$phoneNumberUpdateBtn.Add_Click(
+    {
+        if(($phoneNumber.Text.Length -eq 13) -and ($phoneNumber.Text -match '^\d+$')){
+            $invalidNumberWarning.Text = ""
+
+            $newPhoneNumberToJSON = @{phoneNumber=$phoneNumber.Text} | ConvertTo-Json
+
+            Set-Content -Path $utilInfoJSONPath -Value $newPhoneNumberToJSON
+        } else {
+            $invalidNumberWarning.Text = "Número inválido, tente novamente. (Ex: 5571999999999)"  
+            
+        }
+    }
+)
+$mainTab.Controls.Add($phoneNumberUpdateBtn)
+
 #Posicionando os campos de número de celular
-$phoneNumberInicialPosX = ($windowWidth-$phoneNumber.ClientSize.Width-$phoneNumberLabel.ClientSize.Width-$spaceBetween)/2
+$phoneNumberInicialPosX = ($windowWidth-$phoneNumber.ClientSize.Width-$phoneNumberLabel.ClientSize.Width-$phoneNumberUpdateBtn.ClientSize.Width-(2*$spaceBetween))/2
 $phoneNumberInicialPosY = $mainTabStatus.Location.Y + $mainTabStatus.ClientSize.Height + $spaceBetween  
 $phoneNumberLabel.Location = New-Object System.Drawing.Point($phoneNumberInicialPosX,$phoneNumberInicialPosY)
 $phoneNumber.Location = New-Object System.Drawing.Point(($phoneNumberInicialPosX+ $phoneNumberLabel.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
-
-
-
+$phoneNumberUpdateBtn.Location = New-Object System.Drawing.Point(($phoneNumber.Location.X+$phoneNumber.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
+$invalidNumberWarning.Location = New-Object System.Drawing.Point($phoneNumber.Location.X,($phoneNumber.Location.Y+$phoneNumber.ClientSize.Height))
 
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
@@ -546,16 +573,68 @@ $updateWebButton.Add_Click({
 
 $WebGroupBox.Controls.Add($updateWebButton)
 
-# function Update-Status {
 
-#     while ($true) {
-#         Start-Sleep -Seconds 300
-#         Get-Process -Name "node" -ErrorAction Stop
-#         Get-Process -Name "python" -ErrorAction Stop
-#         $mainTabStatus.Text = "O chatBot está ativo"
-#     }
+#Criando terceira aba para atualizar API-KEYS
 
-# }
+$tabPage3 = New-Object System.Windows.Forms.TabPage
+$tabPage3.Text = "API-KEYS"
+
+##Criando Título e Caixas de Texto para cada API-KEY
+
+
+
+#Criando Label para API-KEY - Groq
+$groqApiKeyLabel = New-Object System.Windows.Forms.Label
+$groqApiKeyLabel.Text = "Groq:"
+$groqApiKeyLabel.AutoSize = $true
+$groqApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,$verticalPadding)
+$tabPage3.Controls.Add($groqApiKeyLabel)
+
+#Criando TextBox para API-KEY - Groq
+$groqApiKeyTextBox = New-Object System.Windows.Forms.TextBox
+$groqApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-$groqApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$groqApiKeyLabel.ClientSize.Height)
+$groqApiKeyTextBox.Location = New-Object System.Drawing.Point(($groqApiKeyLabel.Location.X + $groqApiKeyLabel.ClientSize.Width + $spaceBetween), $groqApiKeyLabel.Location.Y)
+$tabPage3.Controls.Add($groqApiKeyTextBox)
+
+#Criando Label para API-KEY - LangChain
+$langchainApiKeyLabel = New-Object System.Windows.Forms.Label
+$langchainApiKeyLabel.Text = "Langchain:"
+$langchainApiKeyLabel.AutoSize = $true
+$langchainApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($groqApiKeyLabel.Location.X + $groqApiKeyLabel.ClientSize.Height + $spaceBetween))
+$tabPage3.Controls.Add($langchainApiKeyLabel)
+
+#Criando TextBox para API-KEY - LangChain
+$langchainApiKeyTextBox = New-Object System.Windows.Forms.TextBox
+$langchainApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-$langchainApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$langchainApiKeyLabel.ClientSize.Height)
+$langchainApiKeyTextBox.Location = New-Object System.Drawing.Point(($langchainApiKeyLabel.Location.X + $langchainApiKeyLabel.ClientSize.Width + $spaceBetween), $langchainApiKeyLabel.Location.Y)
+$tabPage3.Controls.Add($langchainApiKeyTextBox)
+
+#Criando Label para API-KEY - Tavily
+$tavilyApiKeyLabel = New-Object System.Windows.Forms.Label
+$tavilyApiKeyLabel.Text = "Tavily:"
+$tavilyApiKeyLabel.AutoSize = $true
+$tavilyApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($langchainApiKeyLabel.Location.Y + $langchainApiKeyLabel.ClientSize.Height + $spaceBetween))
+$tabPage3.Controls.Add($tavilyApiKeyLabel)
+
+#Criando TextBox para API-KEY - Tavily
+$tavilyApiKeyTextBox = New-Object System.Windows.Forms.TextBox
+$tavilyApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth -$tavilyApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$tavilyApiKeyLabel.ClientSize.Height)
+$tavilyApiKeyTextBox.Location = New-Object System.Drawing.Point(($tavilyApiKeyLabel.Location.X + $tavilyApiKeyLabel.ClientSize.Width + $spaceBetween), $tavilyApiKeyLabel.Location.Y)
+$tabPage3.Controls.Add($tavilyApiKeyTextBox)
+
+
+#Criando Label para API-KEY - Cohere
+$cohereApiKeyLabel = New-Object System.Windows.Forms.Label
+$cohereApiKeyLabel.Text = "Cohere:"
+$cohereApiKeyLabel.AutoSize = $true
+$cohereApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($tavilyApiKeyLabel.Location.Y + $tavilyApiKeyLabel.ClientSize.Height + $spaceBetween))
+$tabPage3.Controls.Add($cohereApiKeyLabel)
+
+#Criando TextBox para API-KEY - Cohere
+$cohereApiKeyTextBox = New-Object System.Windows.Forms.TextBox
+$cohereApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth - $cohereApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$cohereApiKeyLabel.ClientSize.Height)
+$cohereApiKeyTextBox.Location = New-Object System.Drawing.Point(($cohereApiKeyLabel.Location.X + $cohereApiKeyLabel.ClientSize.Width + $spaceBetween), $cohereApiKeyLabel.Location.Y)
+$tabPage3.Controls.Add($cohereApiKeyTextBox)
 
 
 #Adicionando as Funções dos Botões do início
@@ -564,16 +643,6 @@ $startButton.Add_Click{
     Start-PythonProcess 
 
     $mainTabStatus.Text = "Iniciando chatBot"
-
-    # try {
-    #     Update-Status
-    # }
-    # catch {
-    #     $mainTabStatus.Text = "Processo interrompido, por favor reinicie"
-    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
-
-
-    # }
 }
 
 $restartButton.Add_Click{
@@ -596,6 +665,7 @@ $turnOffButton.Add_Click{
 $tabControl.TabPages.Add($mainTab)
 $tabControl.TabPages.Add($tabPage1)
 $tabControl.TabPages.Add($tabPage2)
+$tabControl.TabPages.Add($tabPage3)
 
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)

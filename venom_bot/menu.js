@@ -17,7 +17,7 @@ const isMenuSelector = (message)=>{
 }
 
 const getSelectorContent = (message)=>{
-    return selectorStore[message].description
+    return selectorStore[message-1].description
 }
 
 export {isMenuSelector,getSelectorContent}
