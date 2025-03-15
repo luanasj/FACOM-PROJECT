@@ -175,6 +175,33 @@ $mainTabStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 $mainTabStatus.Location = New-Object System.Drawing.Point(0,($verticalPadding+$spaceBetween+$mainTabTitle.ClientSize.Height))
 $mainTab.Controls.Add($mainTabStatus)
 
+#Capturando o número de telefone no json
+$utilInfoJSONPath = "$($env:commonPathBot)\assets\utilInfo.json"
+$utilInfoData = Get-Content -Path $utilInfoJSONPath -Raw
+$utilInfoContent = $utilInfoData | ConvertFrom-Json
+
+##Criando campo para adicionar número de telefone
+$phoneNumber = New-Object System.Windows.Forms.TextBox
+$phoneNumber.PlaceholderText = "ex: 5511947270112"
+$phoneNumber.Text = $utilInfoContent.phoneNumber
+$phoneNumber.Size = New-Object System.Drawing.Size(200,20)
+$mainTab.Controls.Add($phoneNumber)
+
+
+#Criando Label para telefone
+$phoneNumberLabel = New-Object System.Windows.Forms.Label
+$phoneNumberLabel.Text = "Celular"
+$phoneNumberLabel.Font = New-Object System.Drawing.Font("Arial",10,[System.Drawing.FontStyle]::Bold)
+$mainTab.Controls.Add($phoneNumberLabel)
+
+#Posicionando os campos de número de celular
+$phoneNumberInicialPosX = ($windowWidth-$phoneNumber.ClientSize.Width-$phoneNumberLabel.ClientSize.Width-$spaceBetween)/2
+$phoneNumberInicialPosY = $mainTabStatus.Location.Y + $mainTabStatus.ClientSize.Height + $spaceBetween  
+$phoneNumberLabel.Location = New-Object System.Drawing.Point($phoneNumberInicialPosX,$phoneNumberInicialPosY)
+$phoneNumber.Location = New-Object System.Drawing.Point(($phoneNumberInicialPosX+ $phoneNumberLabel.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
+
+
+
 
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
