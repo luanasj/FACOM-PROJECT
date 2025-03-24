@@ -1,3 +1,4 @@
+# Set-Location C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents
 # Especificar o caminho para o arquivo .env
 $envPath = ".\.env"
 
@@ -21,7 +22,7 @@ foreach ($line in $envContent) {
 }
 
 $nodeCommand = "-NoExit -Command `"Set-Location $($env:commonPathBot)\venom_bot; node venom_bot.js`""
-$pyhtonCommand = "-NoExit -Command uvicorn --app-dir $($env:commonPathBot)\AdaptativeRAG langchain_bot:asgi_app --host 127.0.0.1 --port 5000 --workers 4 --reload"
+$pyhtonCommand = "-NoExit -Command uvicorn --app-dir $($env:commonPathBot)\AdaptativeRAG langchain_bot:asgi_app --host 127.0.0.1 --port 5000 --workers 4"
 $logsPath = $env:commonPathBot + "\exec\logs.txt"
 
 # Variáveis globais para os processos
@@ -228,7 +229,7 @@ $phoneNumberInicialPosY = $mainTabStatus.Location.Y + $mainTabStatus.ClientSize.
 $phoneNumberLabel.Location = New-Object System.Drawing.Point($phoneNumberInicialPosX,$phoneNumberInicialPosY)
 $phoneNumber.Location = New-Object System.Drawing.Point(($phoneNumberInicialPosX+ $phoneNumberLabel.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
 $phoneNumberUpdateBtn.Location = New-Object System.Drawing.Point(($phoneNumber.Location.X+$phoneNumber.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
-$invalidNumberWarning.Location = New-Object System.Drawing.Point($phoneNumber.Location.X,($phoneNumber.Location.Y+$phoneNumber.ClientSize.Height))
+$invalidNumberWarning.Location = New-Object System.Drawing.Point($phoneNumber.Location.X,($phoneNumber.Location.Y+$phoneNumber.ClientSize.Height+10))
 
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
@@ -577,23 +578,24 @@ $WebGroupBox.Controls.Add($updateWebButton)
 #Criando terceira aba para atualizar API-KEYS
 
 $tabPage3 = New-Object System.Windows.Forms.TabPage
-$tabPage3.Text = "API-KEYS"
+$tabPage3.Text = "API keys"
 
 ##Criando Título e Caixas de Texto para cada API-KEY
-
-
 
 #Criando Label para API-KEY - Groq
 $groqApiKeyLabel = New-Object System.Windows.Forms.Label
 $groqApiKeyLabel.Text = "Groq:"
+$groqApiKeyLabel.Name = ""
 $groqApiKeyLabel.AutoSize = $true
 $groqApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,$verticalPadding)
 $tabPage3.Controls.Add($groqApiKeyLabel)
 
 #Criando TextBox para API-KEY - Groq
 $groqApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$groqApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-$groqApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$groqApiKeyLabel.ClientSize.Height)
+$groqApiKeyTextBox.Text = $env:GROQ_API_KEY
+$groqApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$groqApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$groqApiKeyLabel.ClientSize.Height)
 $groqApiKeyTextBox.Location = New-Object System.Drawing.Point(($groqApiKeyLabel.Location.X + $groqApiKeyLabel.ClientSize.Width + $spaceBetween), $groqApiKeyLabel.Location.Y)
+$groqApiKeyTextBox.Name = "GROQ_API_KEY"
 $tabPage3.Controls.Add($groqApiKeyTextBox)
 
 #Criando Label para API-KEY - LangChain
@@ -605,8 +607,10 @@ $tabPage3.Controls.Add($langchainApiKeyLabel)
 
 #Criando TextBox para API-KEY - LangChain
 $langchainApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$langchainApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-$langchainApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$langchainApiKeyLabel.ClientSize.Height)
+$langchainApiKeyTextBox.Text = $env:LANGCHAIN_API_KEY
+$langchainApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$langchainApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$langchainApiKeyLabel.ClientSize.Height)
 $langchainApiKeyTextBox.Location = New-Object System.Drawing.Point(($langchainApiKeyLabel.Location.X + $langchainApiKeyLabel.ClientSize.Width + $spaceBetween), $langchainApiKeyLabel.Location.Y)
+$langchainApiKeyTextBox.Name = "LANGCHAIN_API_KEY"
 $tabPage3.Controls.Add($langchainApiKeyTextBox)
 
 #Criando Label para API-KEY - Tavily
@@ -618,8 +622,10 @@ $tabPage3.Controls.Add($tavilyApiKeyLabel)
 
 #Criando TextBox para API-KEY - Tavily
 $tavilyApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$tavilyApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth -$tavilyApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$tavilyApiKeyLabel.ClientSize.Height)
+$tavilyApiKeyTextBox.Text = $env:TAVILY_API_KEY
+$tavilyApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$tavilyApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$tavilyApiKeyLabel.ClientSize.Height)
 $tavilyApiKeyTextBox.Location = New-Object System.Drawing.Point(($tavilyApiKeyLabel.Location.X + $tavilyApiKeyLabel.ClientSize.Width + $spaceBetween), $tavilyApiKeyLabel.Location.Y)
+$tavilyApiKeyTextBox.Name = "TAVILY_API_KEY"
 $tabPage3.Controls.Add($tavilyApiKeyTextBox)
 
 
@@ -632,10 +638,46 @@ $tabPage3.Controls.Add($cohereApiKeyLabel)
 
 #Criando TextBox para API-KEY - Cohere
 $cohereApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$cohereApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth - $cohereApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$cohereApiKeyLabel.ClientSize.Height)
+$cohereApiKeyTextBox.Text = $env:COHERE_API_KEY
+$cohereApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$cohereApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$cohereApiKeyLabel.ClientSize.Height)
 $cohereApiKeyTextBox.Location = New-Object System.Drawing.Point(($cohereApiKeyLabel.Location.X + $cohereApiKeyLabel.ClientSize.Width + $spaceBetween), $cohereApiKeyLabel.Location.Y)
+$cohereApiKeyTextBox.Name = "COHERE_API_KEY"
 $tabPage3.Controls.Add($cohereApiKeyTextBox)
 
+#Criando Botão para atualizar API-Keys
+$apiKeysUpdateBtn = New-Object System.Windows.Forms.Button
+$apiKeysUpdateBtn.Text = "Atualizar Chaves"
+$apiKeysUpdateBtn.AutoSize = $true
+$tabPage3.Controls.Add($apiKeysUpdateBtn)
+$apiKeysUpdateBtn.Location = New-Object System.Drawing.Point(($windowWidth -30- $apiKeysUpdateBtn.ClientSize.Width - (2*$horizontalPadding)),($cohereApiKeyTextBox.Location.Y + $cohereApiKeyTextBox.ClientSize.Height + $spaceBetween))
+
+#Adicionando Função para atualizar API-Keys
+
+
+
+$apiKeysUpdateBtn.Add_Click({
+    $apiKeysTextBoxes = @($groqApiKeyTextBox,$langchainApiKeyTextBox,$tavilyApiKeyTextBox,$cohereApiKeyTextBox)
+
+    # # Ler o conteúdo do arquivo .env
+    $dotenvContent = Get-Content -Path "$($env:commonPathBot)\.env"
+
+    $apiKeysUpdatedContent = $dotenvContent
+
+    foreach ($keyTextBox in $apiKeysTextBoxes) {
+        # Definir a chave que você quer alterar e o novo valor
+        $key = $keyTextBox.Name
+        $newValue = $keyTextBox.Text
+
+        # Atualizar a linha correspondente à chave usando regex
+        $apiKeysUpdatedContent = $apiKeysUpdatedContent -replace "($key\s*=\s*).*", "`$1$newValue"
+    }
+
+    # Salvar as alterações de volta no arquivo .env
+    Set-Content -Path $envPath -Value $apiKeysUpdatedContent
+
+    # Write-Output "O arquivo .env foi atualizado com sucesso!"
+
+})
 
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
