@@ -44,7 +44,7 @@ function Start-NodeProcess {
 
     try {
         Start-Sleep -Seconds 20
-        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand -WindowStyle Hidden -PassThru -ErrorAction Stop
+        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop
 
         Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
@@ -68,7 +68,7 @@ function Start-PythonProcess {
     try {
         Start-Sleep -Seconds 10
 
-        $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand -WindowStyle Hidden -PassThru -ErrorAction Stop
+        $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand  -PassThru -ErrorAction Stop
 
         Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
     } catch {
