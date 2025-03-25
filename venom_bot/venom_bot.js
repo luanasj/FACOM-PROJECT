@@ -1,7 +1,10 @@
-import venom from 'venom-bot'
-import {tradeMessageWithChatbot,answerToMedia} from "./messagesFlow.js"
-import WppCounter from "./utils.js"
+// import venom from 'venom-bot'
+// import {tradeMessageWithChatbot,answerToMedia} from "./messagesFlow.js"
+// import WppCounter from "./utils.js"
 
+const venom = require('venom-bot')
+const {tradeMessageWithChatbot,answerToMedia} = require('./MessagesFlow.js')
+const WppCounter = require('./utils.js')
 
 function start(client) {
 

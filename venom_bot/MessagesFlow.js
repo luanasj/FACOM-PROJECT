@@ -1,4 +1,6 @@
-import {isMenuSelector,getSelectorContent} from './menu.js'
+// import {isMenuSelector,getSelectorContent} from './menu.js'
+const { isMenuSelector, getSelectorContent } = require('./menu.js');
+
 
 const chatbotEndpoint = "http://127.0.0.1:5000/aimessage"
 
@@ -50,7 +52,7 @@ async function tradeMessageWithChatbot(client,message) {
   sendTextToUser(client,message,response)
 }
 
-export {tradeMessageWithChatbot, answerToMedia}
+module.exports =  {tradeMessageWithChatbot, answerToMedia}
 
 
 

@@ -1,4 +1,6 @@
-import dados from '../assets/externalInfo.json' assert { type: 'json' };
+// import dados from '../assets/externalInfo.json' assert { type: 'json' };
+
+const dados = require('../assets/externalInfo.json')
 
 const selectorStore = dados
 
@@ -20,7 +22,7 @@ const getSelectorContent = (message)=>{
     return selectorStore[message-1].description
 }
 
-export {isMenuSelector,getSelectorContent}
+module.exports = {isMenuSelector,getSelectorContent}
 
 
 

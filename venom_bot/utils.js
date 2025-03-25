@@ -1,4 +1,6 @@
-import dados from '../assets/utilInfo.json' assert {type:'json'}
+// import dados from '../assets/utilInfo.json' assert {type:'json'}
+
+const dados = require('../assets/utilInfo.json')
 
 console.log(dados)
 
@@ -16,4 +18,4 @@ class WppCounter{
 
 }
 
-export default WppCounter
+module.exports = WppCounter
