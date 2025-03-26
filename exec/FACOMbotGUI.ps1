@@ -83,7 +83,7 @@ function Cleanup {
     Write-Host "`nIniciando operações de limpeza..."
     
     try {
-        Write-Host "A execução do script foi interrompida em: $(Get-Date)"
+        # Write-Host "A execução do script foi interrompida em: $(Get-Date)"
         
         Stop-NodeProcess
         Stop-PythonProcess
@@ -96,8 +96,8 @@ function Cleanup {
         # Deletar a pasta e todos os seus conteúdos
         Remove-Item $pasta -Recurse -Force -ErrorAction SilentlyContinue
 
-        Write-Host "Fechando conexões..."
-        Write-Host "Liberando recursos..."
+        # Write-Host "Fechando conexões..."
+        # Write-Host "Liberando recursos..."
         Start-Sleep -Seconds 10
     }
     catch {
@@ -126,7 +126,7 @@ function Update-Status {
 
 # Registra o manipulador de CTRL+C
 $null = Register-EngineEvent -SourceIdentifier 'PowerShell.Exiting' -Action {
-    Write-Host "`nCTRL+C detectado!"
+    # Write-Host "`nCTRL+C detectado!"
     Cleanup
 }
 

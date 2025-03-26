@@ -62,10 +62,10 @@ vectorstoreContent = getVectorStoreContent(urls)
 from langchain_community.tools.tavily_search import TavilySearchResults
 
 web_search_tool = TavilySearchResults(
-    max_results=5,
+    max_results=3,
     search_depth="advanced",
     include_answer=True,
     include_raw_content=True,
-    include_images=True,
+    include_images=False,
     include_domains=["facom.ufba.br"]
 )
