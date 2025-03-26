@@ -46,7 +46,7 @@ function Start-NodeProcess {
         Start-Sleep -Seconds 20
         $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop
 
-        Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
+        # Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
         Write-Error "Erro ao iniciar o projeto Node.js: $_"
         Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
@@ -70,7 +70,7 @@ function Start-PythonProcess {
 
         $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand  -PassThru -ErrorAction Stop
 
-        Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
+        # Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
     } catch {
         Write-Error "Erro ao iniciar o projeto Python: $_"
         Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
@@ -183,7 +183,7 @@ $utilInfoContent = $utilInfoData | ConvertFrom-Json
 
 ##Criando campo para adicionar número de telefone
 $phoneNumber = New-Object System.Windows.Forms.TextBox
-$phoneNumber.PlaceholderText = "ex: 5511947270112"
+# $phoneNumber.PlaceholderText = "ex: 5511947270112"
 $phoneNumber.Text = $utilInfoContent.phoneNumber
 $phoneNumber.Size = New-Object System.Drawing.Size(200,20)
 $mainTab.Controls.Add($phoneNumber)
