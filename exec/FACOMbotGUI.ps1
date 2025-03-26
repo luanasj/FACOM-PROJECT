@@ -451,7 +451,7 @@ for($i = 0; $i -lt $pdfLinksAmount; $i++){
 #Criando botão para atualizar pdf links
 
 $updatePdfButton = New-Object System.Windows.Forms.Button
-$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- $verticalPadding))
+$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- 80 - $verticalPadding))
 $updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updatePdfButton.Text = "Atualizar PDFs"
@@ -544,7 +544,7 @@ for($i = 0; $i -lt $webLinksAmount; $i++){
 #Criando botão para atualizar pdf links
 
 $updateWebButton = New-Object System.Windows.Forms.Button
-$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight- $verticalPadding))
+$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight-80- $verticalPadding))
 $updateWebButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateWebButton.Text = "Atualizar Artigos Site"
