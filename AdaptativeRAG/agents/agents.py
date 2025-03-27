@@ -23,14 +23,23 @@ from langchain_core.output_parsers import StrOutputParser
 
 # Prompt
 
-system = """You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message.
+system = """
+"You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message. 
 
-If the question is related to FACOM (Faculdade de Comunicação UFBA), including topics such as college/university, enrollment, grades, or any other university-related context, you should retrieve the information from the database.
+If it is a question about some subject such as the university-related context Otherwise you you should retrieve the information from the database.
 
-For all other questions, you should generate an answer without additional context.
+For generic messages, such as greetings ('good morning,' 'hello,' 'can you help me?', 'thank you,' or similar), you should 'generate' without any aditional context.
 
-Your goal is to provide accurate and relevant responses based on the user's query.
-""" 
+"""
+
+# system = """You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message.
+
+# If the question is related to FACOM (Faculdade de Comunicação UFBA), including topics such as college/university, enrollment, grades, or any other university-related context, you should retrieve the information from the database.
+
+# For all other questions, you should generate an answer without additional context.
+
+# Your goal is to provide accurate and relevant responses based on the user's query.
+# """ 
 # system = """You are an expert at deciding, based on a user message, to retrieve or generate an answer.
 #   To retrieve is needed for questions related to FACOM(Faculdade de Comunicação UFBA), about college/university, 
 #   enrolment, grades. Otherwise call generate.

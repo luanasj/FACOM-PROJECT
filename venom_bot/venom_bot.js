@@ -59,7 +59,7 @@ venom
     session: "session_facom_1", //name of session
     headless: false
   })
-  .then((client) => {start(client);console.log(client)})
+  .then((client) => {start(client)})
   .catch((erro) => {
     console.log(erro);
   });
