@@ -358,7 +358,7 @@ $updateMenuButton.Add_Click({
     
     foreach ($selector in $menuSection) {
         if($selector.title.Text -and $selector.description.Text){
-            [void]$dados.Add(@{name = selector.title.Text; description = $selector.description.Text})
+            [void]$dados.Add(@{name = $selector.title.Text; description = $selector.description.Text})
         }
         #    Write-Host $selector.description.Text
     }
