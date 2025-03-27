@@ -2,7 +2,7 @@
 
 const dados = require('../assets/utilInfo.json')
 
-console.log(dados)
+// console.log(dados)
 
 class WppCounter{
     FACOMnumber = dados.phoneNumber

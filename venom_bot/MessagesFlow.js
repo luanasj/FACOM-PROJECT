@@ -8,7 +8,8 @@ function sendTextToUser(client,message,answer){
   client
           .sendText(message.from, answer)
           .then((result) => {
-            console.log('Result: ', result); //return object success
+            // console.log('Result: ', result); //return object success
+            return
           })
           .catch((erro) => {
             console.error('Error when sending: ', erro); //return object error
