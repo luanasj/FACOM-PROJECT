@@ -1,4 +1,4 @@
-# Set-Location C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents
+﻿# Set-Location C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents
 # Especificar o caminho para o arquivo .env
 $envPath = ".\.env"
 
@@ -265,7 +265,7 @@ $box1Height = $form.ClientSize.Height - $buttonHeight - 4*$verticalPadding
 
 $groupBox1 = New-Object System.Windows.Forms.GroupBox
 $groupBox1.Text = "Tópicos do Menu"
-$groupBox1.Size = New-Object System.Drawing.Size($box1Width,$box1Height)
+$groupBox1.Size = New-Object System.Drawing.Size($box1Width,($box1Height - (4*$verticalPadding)))
 $groupBox1.Location = New-Object System.Drawing.Point($horizontalPadding,$verticalPadding)
 $groupBox1.Padding = New-Object System.Windows.Forms.Padding(0)
 $groupBox1.Margin = New-Object System.Windows.Forms.Padding(0)
@@ -274,7 +274,7 @@ $tabPage1.Controls.Add($groupBox1)
 
 $panel1 = New-Object System.Windows.Forms.Panel
 $panel1.AutoScroll = $true
-$panel1.Size = New-Object System.Drawing.Size(($box1Width-(2*$horizontalPadding)),($box1Height-($verticalPadding)))
+$panel1.Size = New-Object System.Drawing.Size(($box1Width-(2*$horizontalPadding)),($box1Height-(6*$verticalPadding)))
 $panel1.Location = New-Object System.Drawing.Point(($verticalPadding/2),(2*$verticalPadding))
 $groupBox1.Controls.Add($panel1)
 
@@ -451,7 +451,7 @@ for($i = 0; $i -lt $pdfLinksAmount; $i++){
 #Criando botão para atualizar pdf links
 
 $updatePdfButton = New-Object System.Windows.Forms.Button
-$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- 80 - $verticalPadding))
+$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- 50 - $verticalPadding))
 $updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updatePdfButton.Text = "Atualizar PDFs"
@@ -544,7 +544,7 @@ for($i = 0; $i -lt $webLinksAmount; $i++){
 #Criando botão para atualizar pdf links
 
 $updateWebButton = New-Object System.Windows.Forms.Button
-$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight-80- $verticalPadding))
+$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight-50- $verticalPadding))
 $updateWebButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateWebButton.Text = "Atualizar Artigos Site"
