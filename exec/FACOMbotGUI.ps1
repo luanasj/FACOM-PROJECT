@@ -139,7 +139,7 @@ Add-Type -AssemblyName System.Drawing
 
 #Definindo medidas padrão da Janela
 $windowWidth = 800
-$windowHeight = 800
+$windowHeight = 700
 $horizontalPadding = 10
 $verticalPadding = 10
 $spaceBetween = 20
