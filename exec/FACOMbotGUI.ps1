@@ -91,7 +91,7 @@ function Cleanup {
         Write-Host "Removendo arquivos temporários..."
         # Especificar o caminho da pasta
         $pasta =  "$($env:commonPathBot)\venom_bot\tokens"
-        Write-Host $pasta
+        # Write-Host $pasta
 
         # Deletar a pasta e todos os seus conteúdos
         Remove-Item $pasta -Recurse -Force -ErrorAction SilentlyContinue
@@ -274,7 +274,7 @@ $tabPage1.Controls.Add($groupBox1)
 
 $panel1 = New-Object System.Windows.Forms.Panel
 $panel1.AutoScroll = $true
-$panel1.Size = New-Object System.Drawing.Size(($box1Width-(2*$horizontalPadding)),($box1Height-(4*$verticalPadding)))
+$panel1.Size = New-Object System.Drawing.Size(($box1Width-(2*$horizontalPadding)),($box1Height-($verticalPadding)))
 $panel1.Location = New-Object System.Drawing.Point(($verticalPadding/2),(2*$verticalPadding))
 $groupBox1.Controls.Add($panel1)
 
@@ -348,27 +348,27 @@ for($i=0;$i -lt 8;$i++){
 }
 
 $updateMenuButton = New-Object System.Windows.Forms.Button
-$updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
 $updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
 $updateMenuButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateMenuButton.Text = "Atualizar Menu"
 $updateMenuButton.Add_Click({
     $caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
-
+    
     $dados = [System.Collections.ArrayList]::new()
-
+    
     foreach ($selector in $menuSection) {
-       if($selector.title.Text -and $selector.description.Text){
-           [void]$dados.Add(@{name = selector.title.Text; description = $selector.description.Text})
-       }
-    #    Write-Host $selector.description.Text
-   }
-
-   $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
-
-   Set-Content -Path $caminhoJson -Value $jsonAtualizado
+        if($selector.title.Text -and $selector.description.Text){
+            [void]$dados.Add(@{name = selector.title.Text; description = $selector.description.Text})
+        }
+        #    Write-Host $selector.description.Text
+    }
+    
+    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
+    
+    Set-Content -Path $caminhoJson -Value $jsonAtualizado
 })
 
+$updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
 $tabPage1.Controls.Add($updateMenuButton)
 
 ###Criando e Editando Aba 2
