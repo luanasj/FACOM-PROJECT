@@ -214,7 +214,7 @@ $phoneNumberUpdateBtn.Add_Click(
 
             $newPhoneNumberToJSON = @{phoneNumber=$phoneNumber.Text} | ConvertTo-Json
 
-            Set-Content -Path $utilInfoJSONPath -Value $newPhoneNumberToJSON
+            Set-Content -Encoding utf8 -Path $utilInfoJSONPath -Value $newPhoneNumberToJSON
         } else {
             $invalidNumberWarning.Text = "Número inválido, tente novamente. (Ex: 5571999999999)"  
             
@@ -365,7 +365,7 @@ $updateMenuButton.Add_Click({
     
     $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
     
-    Set-Content -Path $caminhoJson -Value $jsonAtualizado
+    Set-Content  -Encoding utf8 -Path $caminhoJson -Value $jsonAtualizado
 })
 
 $updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
@@ -474,7 +474,7 @@ $updatePdfButton.Add_Click({
 
     $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
 
-    Set-Content -Path $jsonPath -Value $jsonAtualizado
+    Set-Content -Encoding utf8 -Path $jsonPath -Value $jsonAtualizado
 
     #    Write-Host $selector.description.Text
    
@@ -568,7 +568,7 @@ $updateWebButton.Add_Click({
 
     $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
 
-    Set-Content -Path $jsonPath -Value $jsonAtualizado
+    Set-Content -Encoding utf8 -Path $jsonPath -Value $jsonAtualizado
 
 })
 
