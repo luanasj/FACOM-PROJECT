@@ -7,7 +7,7 @@ from RAG.utils import baixar_pdf,getDocs,getVectorStoreContent
 
 # PDFs to index
 
-with open(os.getenv("commonPathBot")+"\\assets\\externalLinks.json") as file:
+with open(os.getenv("commonPathBot")+"\\assets\\externalLinks.json",'r') as file:
     externalLinks = json.load(file)
 
 
@@ -27,11 +27,14 @@ urls = externalLinks["web"]
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_cohere import CohereEmbeddings
+# from langchain_cohere import CohereEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+
 
 
 # Set embeddings
-embd = CohereEmbeddings(model='embed-english-v3.0')
+# embd = CohereEmbeddings(model='embed-english-v3.0')
+embd = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 #docs
 docs = getDocs(urls,pdflinks,pasta_destino_pdfs)
