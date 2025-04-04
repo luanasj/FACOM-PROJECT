@@ -7,7 +7,7 @@ from RAG.utils import baixar_pdf,getDocs,getVectorStoreContent
 
 # PDFs to index
 
-with open(os.getenv("commonPathBot")+"\\assets\\externalLinks.json",'r') as file:
+with open(os.getenv("commonPathBot")+"\\assets\\externalLinks.json",'r',encoding='utf-8-sig') as file:
     externalLinks = json.load(file)
 
 
