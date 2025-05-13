@@ -118,7 +118,7 @@ def hello(messageid):
     userNumber = escape(messageid).split(sep='@')[0]
     userMessage = escape(request.get_json().get('userMessage'))
     try:
-        respostaDaAI = getAIAnswer(compiled_workflow,f"FACOM,{userMessage}",f"{userNumber}",f"{userNumber[-1]}")
+        respostaDaAI = getAIAnswer(compiled_workflow,f"{userMessage}",f"{userNumber}",f"{userNumber[-1]}")
         return respostaDaAI  
     except Exception as e:
         print(e)

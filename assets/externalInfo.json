@@ -1,30 +1,41 @@
 [
   {
-    "name": "Histórico Escolar",
-    "description": "O histórico escolar deve ser solicitado conforme orientações constantes no Guia do Estudante disponível no site da SUPAC (https://supac.ufba.br/)."
+    "subtopics": [
+      {
+        "name": "Histórico Escolar",
+        "description": "O histórico escolar deve ser solicitado conforme orientações constantes no Guia do Estudante disponível no site da SUPAC (https://supac.ufba.br/)."
+      },
+      {
+        "name": "Relatório de Estágio",
+        "description": "A cada período máximo de 06 meses estagiados é necessária a entrega do relatório de estágio correspondente. Há diversas informações no site da Facom (https://www.facom.ufba.br/portal/arquivo/7/1/normas-e-formularios)."
+      },
+      {
+        "name": "Aproveitamento de Estudos",
+        "description": "A qualquer momento do curso é possível solicitar o aproveitamento de estudos realizados em outro curso ou instituição."
+      }
+    ],
+    "topic": "Acadêmicos"
   },
   {
-    "name": "Relatório de Estágio",
-    "description": "A cada período máximo de 06 meses estagiados é necessária a entrega do relatório de estágio correspondente. Há diversas informações pertinentes a estágio no site da Facom (https://www.facom.ufba.br/portal/arquivo/7/1/normas-e-formularios). As informações para estudantes estão no Manual de Procedimentos de Estágio. Caso necessário, dispomos de um modelo de relatório também no mesmo link acima indicado.\nPara mais informações acesse: https://facom.ufba.br/portal/pagina/47/"
+    "subtopics": [
+      {
+        "name": "Atestado Médico (Abono de falta)",
+        "description": "Caso o período de afastamento não inclua avaliações e seja inferior a 25% do semestre, trate diretamente com cada docente."
+      },
+      {
+        "name": "Inscrição em componentes de outros cursos",
+        "description": "Verifique no site da SUPAC quais disciplinas foram ofertadas aos outros cursos e compareça ao Colegiado para ajustar a inscrição."
+      }
+    ],
+    "topic": "Procedimentos"
   },
   {
-    "name": "Aproveitamento de Estudos",
-    "description": "A qualquer momento do curso é possível realizar a solicitação de aproveitamento de estudos realizados em outro curso ou em outra instituição, mas recomendamos que isso seja feito o quanto antes, pois os aproveitamentos podem ter consequências para suas possibilidades futuras de inscrição em disciplinas (dispensando pré-requisitos, por exemplo) e para a integralização curricular do curso. O processo deve ser aberto conforme orientações da SUPAC (https://supac.ufba.br/).\nPara mais informações acesse: https://facom.ufba.br/portal/pagina/47/"
-  },
-  {
-    "name": "Atestado Médico (Abono de falta)",
-    "description": "Caso o período de afastamento das atividades informado no atestado médico não inclua atividades de avaliação e seja menor do que 25% do semestre na disciplina em questão, não há previsão no REGPG a respeito de abono de faltas, sendo esta uma possibilidade que pode ser tratada diretamente com cada docente. O REGPG prevê que a falta em avaliações dá direito à segunda chamada. O procedimento a ser seguido é fazer uma solicitação de segunda chamada ao Departamento de Comunicação (deptcom@ufba.br)."
-  },
-  {
-    "name": "Inscrição em componentes de outros cursos",
-    "description": "No site da Supac você pode verificar quais disciplinas foram ofertadas aos outros cursos neste semestre (https://supac.ufba.br/guia-de-matricula). Para efetuar a inscrição nas disciplinas que não foram ofertadas a seu curso você deverá comparecer no Colegiado no período de ajuste."
-  },
-  {
-    "name": "Contato de professor ",
-    "description": "Para entrar em contato por e-mail com algum docente do Departamento de Comunicação, acesse a página \"Departamento\" - \"Professores\" no menu do Site da Facom. Ou entre no link a seguir e clique no docente que deseja contatar: https://facom.ufba.br/portal/professores"
-  },
-  {
-    "name": "Contato de professor ",
-    "description": "Para entrar em contato por e-mail com algum docente do Departamento de Comunicação, acesse a página \"Departamento\" - \"Professores\" no menu do Site da Facom. Ou entre no link a seguir e clique no docente que deseja contatar: https://facom.ufba.br/portal/professores"
+    "subtopics": [
+      {
+        "name": "Contato de professor",
+        "description": "Para entrar em contato por e-mail com um docente do Departamento de Comunicação, acesse a página “Departamento” - “Professores” no site da Facom ou clique no link: https://facom.ufba.br/portal/professores."
+      }
+    ],
+    "topic": "Contatos"
   }
 ]

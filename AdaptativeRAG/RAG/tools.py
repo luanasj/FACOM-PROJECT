@@ -65,7 +65,7 @@ vectorstoreContent = getVectorStoreContent(urls)
 from langchain_community.tools.tavily_search import TavilySearchResults
 
 web_search_tool = TavilySearchResults(
-    max_results=3,
+    max_results=1,
     search_depth="advanced",
     include_answer=True,
     include_raw_content=True,

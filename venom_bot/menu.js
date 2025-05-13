@@ -36,16 +36,20 @@
 const dados = require('../assets/externalInfo.json')
 
 const initial = (chat,message) => {
-    return dados.map(section=>section.topic)
+    const initialText = "Olá! Bem vindo ao FACOM-bot. Estou aqui para ajudá-lo com informações sobre a FACOM (Faculdade de Comunicação) da UFBA. \nEscolha uma das oções abaixo digitando o número da opção desejada.\n\n"
+
+    return initialText + dados.map((section,index)=>`${index + 1} ${section.topic}`).join("\n")
 }
 
 const stateOne = (chat,message)=>{
-    return dados[message]?.subtopics.map(topic => topic.name)
+    return "Escolha uma das opções abaixo:\n\n" + dados[message]?.subtopics.map((topic,index) => `${index + 1} ${topic.name}`).join("\n") + "\n\nDigite 0 para retornar ao menu anterior"
 }
 
 const stateTwo = (chat,message)=>{
-    const isNumber = typeof(message) === "number"
-    return dados[chat.option]?.subtopics[message].description
+    // const isNumber = typeof(message) === "number"
+    const response = dados[chat.option]?.subtopics[message]?.description
+
+    return  response ? response + "\n\nDigite 0 para retornar ao menu anterior" : response
 }
 
 const content = [initial,stateOne,stateTwo]

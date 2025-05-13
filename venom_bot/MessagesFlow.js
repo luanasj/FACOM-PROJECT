@@ -55,34 +55,71 @@
 
 // module.exports =  {tradeMessageWithChatbot, answerToMedia}
 
-const {getChat,updateChatState,addChat} = require("./chats")
+const {getChat,updateChatState,updateOption,addChat} = require("./chats")
 const {content} = require("./menu")
 
 const messageHandler = (message) =>{
   const phoneNumber = message.from
 
-  const chat = getChat(phoneNumber)
-
-  if(!chat) {
+  if(!getChat(phoneNumber)) {
     addChat(phoneNumber)
-    chat = getChat(phoneNumber)
   }
 
-  if(message.body == "0") {
+  let chat = getChat(phoneNumber)
+  // console.log(chat)
+
+
+  if((message.body == "0") && (chat.state > 0)) {
+    updateOption(phoneNumber,null)
     updateChatState(phoneNumber,-1,content.length-1)
+
+    console.log("Estado antes:", chat.state)
     chat = getChat(phoneNumber)
+    console.log("Estado depois:", chat.state)
+
+
     return content[chat.state](chat,message.body)
   }
 
-  const response = content[chat.state](chat,message.body)
+  const response = content[chat.state](chat,parseInt(message.body)-1)
 
   if(response) {
+    updateOption(phoneNumber,parseInt(message.body)-1)
     updateChatState(phoneNumber,1,content.length-1)
     return response
   }
 
   return "Resposta inválida, por favor responda com o número referente a uma das opções";
 }
+
+function sendTextToUser(client,message,answer){
+  client
+          .sendText(message.from, answer)
+          .then((result) => {
+            // console.log('Result: ', result); //return object success
+            return
+          })
+          .catch((erro) => {
+            console.error('Error when sending: ', erro); //return object error
+          });
+}
+
+function answerToMedia(client,message){
+  // RESPOSTA MENSAGEM DE MÍDIA
+  const response = "Sinto muito, mas não consigo processar este formato de mensagem.\nPor favor envie uma mensagem de texto."
+  sendTextToUser(client,message,response) 
+}
+
+function tradeMessageWithChatbot(client,message) {
+  const response = messageHandler(message)
+  sendTextToUser(client,message,response)
+}
+
+module.exports = {answerToMedia, tradeMessageWithChatbot}
+
+
+
+
 
 
 

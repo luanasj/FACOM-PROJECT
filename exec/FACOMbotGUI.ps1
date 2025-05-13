@@ -1,4 +1,4 @@
-﻿# Set-Location C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents
+# Set-Location C:\Users\luana\OneDrive\Documentos\FACOM-Project\Agents
 # Especificar o caminho para o arquivo .env
 $envPath = ".\.env"
 
@@ -55,26 +55,26 @@ function Start-NodeProcess {
 
 #Função para parar o Processo Python
 function Stop-PythonProcess {
-    Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
-    if($global:pythonProcess){
-        Start-Sleep -Seconds 3
-        Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue #powershell
-    }
+    # Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
+    # if($global:pythonProcess){
+    #     Start-Sleep -Seconds 3
+    #     Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue #powershell
+    # }
 }
 
 # Função para iniciar o projeto Python
 function Start-PythonProcess {
-    Stop-PythonProcess
-    try {
-        Start-Sleep -Seconds 10
+    # Stop-PythonProcess
+    # try {
+    #     Start-Sleep -Seconds 10
 
-        $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand  -PassThru -ErrorAction Stop
+    #     $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand  -PassThru -ErrorAction Stop
 
-        # Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
-    } catch {
-        Write-Error "Erro ao iniciar o projeto Python: $_"
-        Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
-    }
+    #     # Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
+    # } catch {
+    #     Write-Error "Erro ao iniciar o projeto Python: $_"
+    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
+    # }
 }
 
 
@@ -289,84 +289,106 @@ $menuSectionTitle.Location = New-Object System.Drawing.Point(150,0)
 $menuSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
 $panel1.Controls.Add($menuSectionTitle)
 
+$caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
+$jsonContent = Get-Content -Path $caminhoJSON -Raw
+$dados = $jsonContent | ConvertFrom-Json
 
-for($i=0;$i -lt 8;$i++){
-    $caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
+$subtopicCount = 4
+$descTextHeight = 60
+$topicHeight = 25
+$subtopicRowHeight = $descTextHeight + 5
+$spaceBetween = 10
 
-    $jsonContent = Get-Content -Path $caminhoJSON -Raw
+for ($i = 0; $i -lt 8; $i++) {
+    $baseY = $menuSectionTitle.ClientSize.Height + ($i * (($subtopicCount * $subtopicRowHeight) + $topicHeight + 2 * $spaceBetween))
+    $labelWidth = 20
+    $textBoxesWidth = ($box1Width - $labelWidth - 4 * $spaceBetween) / 2
 
-    $dados = $jsonContent | ConvertFrom-Json
-
-
-    $descTextHeight = 80
-
-    $x = 20
-    $y = $menuSectionTitle.ClientSize.Height + ($descTextHeight + $spaceBetween)*$i
-
-    $labelWidth = 15
-    $labelHeight = 20
+    # Label numérico
     $menuLabel = New-Object System.Windows.Forms.Label
-    $menuLabel.Text = $i+1
-    $menuLabel.Padding = New-Object System.Windows.Forms.Padding(0)
-    $menuLabel.Margin = New-Object System.Windows.Forms.Padding(0)
-    $menuLabel.Location = New-Object System.Drawing.Point(0,$y)
-    $menuLabel.Size = New-Object System.Drawing.Size($labelWidth,$labelHeight)
+    $menuLabel.Text = $i + 1
+    $menuLabel.Location = New-Object System.Drawing.Point(0, $baseY)
+    $menuLabel.Size = New-Object System.Drawing.Size($labelWidth, $topicHeight)
     $panel1.Controls.Add($menuLabel)
-    
-    $textBoxesWidth = ($box1Width - $labelWidth- 2*$x - 2*$spaceBetween) / 2
-     
-    $titleTextX = $labelWidth + $spaceBetween
-    $titleText = New-Object System.Windows.Forms.TextBox
-    $titleText.Location = New-Object System.Drawing.Point($titleTextX,$y)
-    if($i -lt $dados.Count){
-        $titleText.Text = $dados[$i].name
+
+    # Campo Topic
+    $topicText = New-Object System.Windows.Forms.TextBox
+    $topicText.Location = New-Object System.Drawing.Point(($labelWidth + $spaceBetween), $baseY)
+    $topicText.Size = New-Object System.Drawing.Size(($box1Width - $labelWidth - 2 * $spaceBetween), $topicHeight)
+    if ($i -lt $dados.Count) {
+        $topicText.Text = $dados[$i].topic
     }
-    $titleText.Margin = New-Object System.Windows.Forms.Padding(0)
-    $titleText.Padding = New-Object System.Windows.Forms.Padding(0)
-    $titleText.Size = New-Object System.Drawing.Size($textBoxesWidth,25)
-    $titleText.Multiline = $true
-    $titleText.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-    $panel1.Controls.Add($titleText) 
+    $panel1.Controls.Add($topicText)
 
-    $descTextX = $titleTextX + $textBoxesWidth + $spaceBetween
-    $descText = New-Object System.Windows.Forms.TextBox
-    $descText.Location = New-Object System.Drawing.Point($descTextX,$y)
-    if($i -lt $dados.Count){
-        $descText.Text = $dados[$i].description
+    $subtopicsBoxes = @()
+
+    for ($j = 0; $j -lt $subtopicCount; $j++) {
+        $subY = $baseY + $topicHeight + $spaceBetween + $j * $subtopicRowHeight
+        $nameBox = New-Object System.Windows.Forms.TextBox
+        $nameBox.Location = New-Object System.Drawing.Point(($labelWidth + $spaceBetween), $subY)
+        $nameBox.Size = New-Object System.Drawing.Size($textBoxesWidth, 25)
+
+        $descBox = New-Object System.Windows.Forms.TextBox
+        $descBox.Location = New-Object System.Drawing.Point(($labelWidth + 2 * $spaceBetween + $textBoxesWidth), $subY)
+        $descBox.Size = New-Object System.Drawing.Size($textBoxesWidth, $descTextHeight)
+        $descBox.Multiline = $true
+        $descBox.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+
+        if ($i -lt $dados.Count -and $dados[$i].subtopics.Count -gt $j) {
+            $nameBox.Text = $dados[$i].subtopics[$j].name
+            $descBox.Text = $dados[$i].subtopics[$j].description
+        }
+
+        $panel1.Controls.Add($nameBox)
+        $panel1.Controls.Add($descBox)
+        $subtopicsBoxes += @{ name = $nameBox; descricao = $descBox }
     }
-    $descText.Padding =New-Object System.Windows.Forms.Padding(0)
-    $descText.Margin = New-Object System.Windows.Forms.Padding(0)
-    $descText.Size = New-Object System.Drawing.Size($textBoxesWidth,$descTextHeight)
-    $descText.Multiline = $true  
-    $descText.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
 
-    $panel1.Controls.Add($descText)
+    $section = @{
+        topic     = $topicText
+        subtopics = $subtopicsBoxes
+    }
 
-    $section = @{selector = $menuLabel; title = $titleText; description = $descText}
     [void]$menuSection.Add($section)
-
 }
 
+# Botão para atualizar o JSON
 $updateMenuButton = New-Object System.Windows.Forms.Button
-$updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$updateMenuButton.Size = New-Object System.Drawing.Size($buttonWidth, $buttonHeight)
 $updateMenuButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $updateMenuButton.Text = "Atualizar Menu"
+$updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding - 30), ($form.ClientSize.Height - $buttonHeight - 30))
+
 $updateMenuButton.Add_Click({
-    $caminhoJSON = "$($env:commonPathBot)\assets\externalInfo.json"
-    
-    $dados = [System.Collections.ArrayList]::new()
-    
-    foreach ($selector in $menuSection) {
-        if($selector.title.Text -and $selector.description.Text){
-            [void]$dados.Add(@{name = $selector.title.Text; description = $selector.description.Text})
+    $caminhoJson = "$($env:commonPathBot)\assets\externalInfo.json"
+    $novoDados = @()
+
+    foreach ($section in $menuSection) {
+        $topic = $section.topic.Text
+        $subtopics = @()
+
+        foreach ($sub in $section.subtopics) {
+            $name = $sub.name.Text
+            $desc = $sub.descricao.Text
+            if ($name -and $desc) {
+                $subtopics += @{ name = $name; description = $desc }
+            }
         }
-        #    Write-Host $selector.description.Text
+
+        if ($topic) {
+            $novoItem = @{
+                topic     = $topic
+                subtopics = $subtopics
+            }
+            $novoDados += $novoItem
+        }
     }
-    
-    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
-    
-    Set-Content  -Encoding utf8 -Path $caminhoJson -Value $jsonAtualizado
+
+    $jsonFinal = $novoDados | ConvertTo-Json -Depth 10
+    Set-Content -Encoding utf8 -Path $caminhoJson -Value $jsonFinal
 })
+
+# $tabPage1.Controls.Add($updateMenuButton)
 
 $updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
 $tabPage1.Controls.Add($updateMenuButton)
@@ -706,8 +728,8 @@ $turnOffButton.Add_Click{
 #Adicionando Abas ao tab Control
 $tabControl.TabPages.Add($mainTab)
 $tabControl.TabPages.Add($tabPage1)
-$tabControl.TabPages.Add($tabPage2)
-$tabControl.TabPages.Add($tabPage3)
+# $tabControl.TabPages.Add($tabPage2)
+# $tabControl.TabPages.Add($tabPage3)
 
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)

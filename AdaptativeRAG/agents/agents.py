@@ -24,13 +24,21 @@ from langchain_core.output_parsers import StrOutputParser
 # Prompt
 
 system = """
-"You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message. 
-
-If it is a question about some subject such as the university-related context Otherwise you you should retrieve the information from the database.
+You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message. 
 
 For generic messages, such as greetings ('good morning,' 'hello,' 'can you help me?', 'thank you,' or similar), you should 'generate' without any aditional context.
 
+Otherwise you you should retrieve the information from the database.
+
 """
+# """
+# You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message. 
+
+# If it is a question about some subject such as the university-related context Otherwise you you should retrieve the information from the database.
+
+# For generic messages, such as greetings ('good morning,' 'hello,' 'can you help me?', 'thank you,' or similar), you should 'generate' without any aditional context.
+
+# """
 
 # system = """You are an expert at determining whether to retrieve information from a database or generate an answer based on a user message.
 
