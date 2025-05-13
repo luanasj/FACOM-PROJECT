@@ -12,26 +12,29 @@ chats.push({
     option:null
 })
 
-const getChat = (chatsList,tel)=>{
-   return chatsList.find(value => value.tel == tel)
+const getChat = (tel)=>{
+   return chats.find(value => value.tel == tel)
 }
 
-const updateChatState = (chatsList,tel,increment,maxState)=>{
+const updateChatState = (tel,increment,maxState)=>{
     
-    const chatIndex = chatsList.indexOf(getChat(chatsList,tel))
+    const chatIndex = chats.indexOf(getChat(chats,tel))
 
     const currentState = chats[chatIndex].state 
 
     chats[chatIndex].state = (currentState < maxState) && (currentState >= 0) ? currentState + (increment) : 0
 }
 
-const addChat = (chatsList,tel) =>{
-    chatsList.push({
+const addChat = (tel) =>{
+    chats.push({
             tel: tel,
             state: 0,
             option:null
     })
 }
+
+
+
 // console.log(getChat(chats,"123456"))
 // console.log(getChat(chats,"586727"))
 
@@ -57,5 +60,5 @@ const addChat = (chatsList,tel) =>{
 
 
 
-module.exports = {chats}
+module.exports = {chats,getChat,updateChatState,addChat}
 

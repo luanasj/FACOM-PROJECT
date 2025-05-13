@@ -59,7 +59,7 @@ module.exports = {content}
 // console.log(stateTwo({
 //     tel: 123456,
 //     state: 0,
-//     option: 0},1))
+//     option: null},1))
 
 
 
