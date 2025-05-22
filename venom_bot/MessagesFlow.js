@@ -73,12 +73,12 @@ const messageHandler = (message) =>{
     updateOption(phoneNumber,null)
     updateChatState(phoneNumber,-1,content.length-1)
 
-    console.log("Estado antes:", chat.state)
-    chat = getChat(phoneNumber)
-    console.log("Estado depois:", chat.state)
+    // console.log("Estado antes:", chat.state)
+    // chat = getChat(phoneNumber)
+    // console.log("Estado depois:", chat.state)
 
 
-    return content[chat.state](chat,message.body)
+    return content[parseInt(chat.state)](chat,message.body)
   }
 
   const response = content[chat.state](chat,parseInt(message.body)-1)
