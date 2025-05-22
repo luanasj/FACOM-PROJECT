@@ -53,30 +53,6 @@ function Start-NodeProcess {
     }
 }
 
-#Função para parar o Processo Python
-function Stop-PythonProcess {
-    # Stop-Process -Name "python" -ErrorAction SilentlyContinue #python
-    # if($global:pythonProcess){
-    #     Start-Sleep -Seconds 3
-    #     Stop-Process -Id $global:pythonProcess.Id -Force -ErrorAction SilentlyContinue #powershell
-    # }
-}
-
-# Função para iniciar o projeto Python
-function Start-PythonProcess {
-    # Stop-PythonProcess
-    # try {
-    #     Start-Sleep -Seconds 10
-
-    #     $global:pythonProcess = Start-Process powershell -ArgumentList $pyhtonCommand  -PassThru -ErrorAction Stop
-
-    #     # Write-Output "Python process started with ID: $($global:pythonProcess.Id)"
-    # } catch {
-    #     Write-Error "Erro ao iniciar o projeto Python: $_"
-    #     Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
-    # }
-}
-
 
 # Função que será chamada na limpeza
 function Cleanup {
@@ -96,8 +72,6 @@ function Cleanup {
         # Deletar a pasta e todos os seus conteúdos
         Remove-Item $pasta -Recurse -Force -ErrorAction SilentlyContinue
 
-        # Write-Host "Fechando conexões..."
-        # Write-Host "Liberando recursos..."
         Start-Sleep -Seconds 10
     }
     catch {
@@ -109,11 +83,9 @@ function Cleanup {
     }
 }
 
-# $global:checkProcessStatus = $true
 function Update-Status {
 
     try {
-    #    Get-Process -Name "python" -ErrorAction Stop
        Get-Process -Name "node" -ErrorAction Stop
 
        return "Chatbot ativo."
@@ -126,12 +98,8 @@ function Update-Status {
 
 # Registra o manipulador de CTRL+C
 $null = Register-EngineEvent -SourceIdentifier 'PowerShell.Exiting' -Action {
-    # Write-Host "`nCTRL+C detectado!"
     Cleanup
 }
-
-# Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -Action $eventAction
-
 
 #Carregar o assembly do Windows Forms
 Add-Type -AssemblyName System.Windows.Forms
@@ -430,332 +398,19 @@ $updateMenuButton.Add_Click({
     Set-Content -Encoding utf8 -Path $caminhoJson -Value $jsonFinal
 })
 
-# $tabPage1.Controls.Add($updateMenuButton)
-
 $updateMenuButton.Location = New-Object System.Drawing.Point(($windowWidth - $buttonWidth - $horizontalPadding-30),($form.ClientSize.Height-$buttonHeight- 30))
 $tabPage1.Controls.Add($updateMenuButton)
 
-###Criando e Editando Aba 2
-
-#Criar aba 2
-$tabPage2 = New-Object System.Windows.Forms.TabPage
-$tabPage2.Text = "IA Info"
-
-#Criando Panel 2
-$panel2 = New-Object System.Windows.Forms.Panel
-$panel2.AutoScroll = $true
-$panel2.Size = New-Object System.Drawing.Size($form.ClientSize.Width,($form.ClientSize.Height - 30))
-$panel2.Location = New-Object System.Drawing.Point(0,0)
-$tabPage2.Controls.Add($panel2)
-
-#Criando GroupBoxes da Aba 2
-$linksBoxWidth = $form.ClientSize.Width - 2*3 - 2*$horizontalPadding
-$linksBoxHeight = $form.ClientSize.Height / 2
-
-
-#Group Box para links de pdf
-$pdfGroupBox = New-Object System.Windows.Forms.GroupBox
-$pdfGroupBox.Text = "Links de PDF"
-$pdfGroupBox.Size = New-Object System.Drawing.Size($linksBoxWidth,$linksBoxHeight)
-$pdfGroupBox.Location = New-Object System.Drawing.Point($horizontalPadding,$verticalPadding)
-$pdfGroupBox.Padding = New-Object System.Windows.Forms.Padding(0)
-$pdfGroupBox.Margin = New-Object System.Windows.Forms.Padding(0)
-$panel2.Controls.Add($pdfGroupBox)
-
-#Colocando titulo na sessão de links pdf 
-$pdfSectionTitle = New-Object System.Windows.Forms.Label
-$pdfSectionTitle.Text = "Título(Sem Espaços)                                                                   Link"
-$pdfSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
-$pdfSectionTitle.Location = New-Object System.Drawing.Point(100,$verticalPadding)
-$pdfSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
-$pdfGroupBox.Controls.Add($pdfSectionTitle)
-
-
-#Criando seções para links de pdf
-$pdfLinksSection = [System.Collections.ArrayList]::new()
-
-$pdfLinksAmount = 3
-
-$linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
-$linksTextBoxHeight = ($linksBoxHeight -  2*$verticalPadding - ($pdfLinksAmount-1)*$spaceBetween)/5
-
-for($i = 0; $i -lt $pdfLinksAmount; $i++){
-    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
-
-    $jsonContent = Get-Content -Path $jsonPath -Raw 
-    
-    $dados = $jsonContent | ConvertFrom-Json 
-
-    $pdfs = $dados.pdfs
-
-    $y = $verticalPadding + $pdfSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
-
-    $pdfDesc = New-Object System.Windows.Forms.TextBox
-    $pdfDesc.Multiline = $true
-    if($i -lt $pdfs.Count){
-        $pdfDesc.Text = $pdfs[$i].title
-    }
-    $pdfDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
-    $pdfDesc.Location = New-Object System.Drawing.Point($horizontalPadding, $y)
-    $pdfGroupBox.Controls.Add($pdfDesc)
-
-    $pdfLink = New-Object System.Windows.Forms.TextBox
-    $pdfLink.Multiline = $true
-    if($i -lt $pdfs.Count){
-        $pdfLink.Text = $pdfs[$i].link
-    }
-    $pdfLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
-    $pdfLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
-    $pdfGroupBox.Controls.Add($pdfLink)
-
-    [void]$pdfLinksSection.Add(@{title = $pdfDesc; link = $pdfLink})
-    
-}
-
-#Criando botão para atualizar pdf links
-
-$updatePdfButton = New-Object System.Windows.Forms.Button
-$updatePdfButton.Location = New-Object System.Drawing.Point(($pdfGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($pdfGroupBox.ClientSize.Height-$buttonHeight- 50 - $verticalPadding))
-$updatePdfButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
-$updatePdfButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
-$updatePdfButton.Text = "Atualizar PDFs"
-$updatePdfButton.Add_Click({
-    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
-
-    $jsonContent = Get-Content -Path $jsonPath -Raw 
-    
-    $dados = $jsonContent | ConvertFrom-Json 
-
-    $novosDados = [System.Collections.ArrayList]::new()
-
-    foreach($pdf in $pdfLinksSection){
-        if($pdf.title.Text -and $pdf.link.Text){
-            $novosDados.Add(@{title = $pdf.title.Text; link = $pdf.link.Text})
-        }
-    }
-
-    $dados.pdfs = $novosDados
-
-    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
-
-    Set-Content -Encoding utf8 -Path $jsonPath -Value $jsonAtualizado
-
-    #    Write-Host $selector.description.Text
-   
-})
-
-$pdfGroupBox.Controls.Add($updatePdfButton)
-
-
-#Group Box para links de artigos do site
-$webGroupBox = New-Object System.Windows.Forms.GroupBox
-$webGroupBox.Text = "Links de Artigos do Site"
-$webGroupBox.Size = New-Object System.Drawing.Size($linksBoxWidth,$linksBoxHeight)
-$webGroupBox.Location = New-Object System.Drawing.Point($horizontalPadding,($linksBoxHeight + $spaceBetween + $verticalPadding))
-$webGroupBox.Padding = New-Object System.Windows.Forms.Padding(0)
-$webGroupBox.Margin = New-Object System.Windows.Forms.Padding(0)
-$panel2.Controls.Add($webGroupBox)
-
-#Colocando titulo na sessão de links web 
-$webSectionTitle = New-Object System.Windows.Forms.Label
-$webSectionTitle.Text = "Descrição                                                                         Link"
-$webSectionTitle.Font = New-Object System.Drawing.Font("Arial", 12, [System.Drawing.FontStyle]::Bold)
-$webSectionTitle.Location = New-Object System.Drawing.Point(150,$verticalPadding)
-$webSectionTitle.Size = New-Object System.Drawing.Size(($box1Width - 100),20)
-$webGroupBox.Controls.Add($webSectionTitle)
-
-#Criando seções para links de pdf
-$webLinksSection = [System.Collections.ArrayList]::new()
-
-$webLinksAmount = 3
-
-$linksTextBoxWidth = ($linksBoxWidth - 2*$horizontalPadding - $spaceBetween)/2
-$linksTextBoxHeight = ($linksBoxHeight - 2*$verticalPadding - ($webLinksAmount-1)*$spaceBetween)/5
-
-for($i = 0; $i -lt $webLinksAmount; $i++){
-    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
-
-    $jsonContent = Get-Content -Path $jsonPath -Raw 
-    
-    $dados = $jsonContent | ConvertFrom-Json 
-
-    $webInfo = $dados.web
-
-    $y = $verticalPadding + $webSectionTitle.ClientSize.Height + ($linksTextBoxHeight + $spaceBetween)*$i
-
-    $webDesc = New-Object System.Windows.Forms.TextBox
-    $webDesc.Multiline = $true
-    if($i -lt $webInfo.Count){
-        $webDesc.Text = $webInfo[$i].description
-    }
-    $webDesc.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
-    $webDesc.Location = New-Object System.Drawing.Point($horizontalPadding, $y)
-    $webGroupBox.Controls.Add($webDesc)
-
-    $webLink = New-Object System.Windows.Forms.TextBox
-    $webLink.Multiline = $true
-    if($i -lt $webInfo.Count){
-        $webLink.Text = $webInfo[$i].link
-    }
-    $webLink.Size = New-Object System.Drawing.Size($linksTextBoxWidth,$linksTextBoxHeight)
-    $webLink.Location = New-Object System.Drawing.Point(($horizontalPadding + $linksTextBoxWidth + $spaceBetween), $y)
-    $webGroupBox.Controls.Add($webLink)
-
-    [void]$webLinksSection.Add(@{desc = $webDesc; link = $webLink})
-    
-}
-
-#Criando botão para atualizar pdf links
-
-$updateWebButton = New-Object System.Windows.Forms.Button
-$updateWebButton.Location = New-Object System.Drawing.Point(($webGroupBox.ClientSize.Width - $buttonWidth - $horizontalPadding),($webGroupBox.ClientSize.Height-$buttonHeight-50- $verticalPadding))
-$updateWebButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
-$updateWebButton.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
-$updateWebButton.Text = "Atualizar Artigos Site"
-$updateWebButton.Add_Click({
-
-    $jsonPath = "$($env:commonPathBot)\assets\externalLinks.json"
-
-    $jsonContent = Get-Content -Path $jsonPath -Raw 
-    
-    $dados = $jsonContent | ConvertFrom-Json 
-
-    $novosDados = [System.Collections.ArrayList]::new()
-
-    foreach($article in $webLinksSection){
-        if($article.title.Text -and $article.link.Text){
-            $novosDados.Add(@{title = $article.title.Text; link = $article.link.Text})
-        }
-    }
-
-    $dados.web = $novosDados
-
-    $jsonAtualizado = $dados | ConvertTo-Json -Depth 10
-
-    Set-Content -Encoding utf8 -Path $jsonPath -Value $jsonAtualizado
-
-})
-
-$WebGroupBox.Controls.Add($updateWebButton)
-
-
-#Criando terceira aba para atualizar API-KEYS
-
-$tabPage3 = New-Object System.Windows.Forms.TabPage
-$tabPage3.Text = "API keys"
-
-##Criando Título e Caixas de Texto para cada API-KEY
-
-#Criando Label para API-KEY - Groq
-$groqApiKeyLabel = New-Object System.Windows.Forms.Label
-$groqApiKeyLabel.Text = "Groq:"
-$groqApiKeyLabel.Name = ""
-$groqApiKeyLabel.AutoSize = $true
-$groqApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,$verticalPadding)
-$tabPage3.Controls.Add($groqApiKeyLabel)
-
-#Criando TextBox para API-KEY - Groq
-$groqApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$groqApiKeyTextBox.Text = $env:GROQ_API_KEY
-$groqApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$groqApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$groqApiKeyLabel.ClientSize.Height)
-$groqApiKeyTextBox.Location = New-Object System.Drawing.Point(($groqApiKeyLabel.Location.X + $groqApiKeyLabel.ClientSize.Width + $spaceBetween), $groqApiKeyLabel.Location.Y)
-$groqApiKeyTextBox.Name = "GROQ_API_KEY"
-$tabPage3.Controls.Add($groqApiKeyTextBox)
-
-#Criando Label para API-KEY - LangChain
-$langchainApiKeyLabel = New-Object System.Windows.Forms.Label
-$langchainApiKeyLabel.Text = "Langchain:"
-$langchainApiKeyLabel.AutoSize = $true
-$langchainApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($groqApiKeyLabel.Location.X + $groqApiKeyLabel.ClientSize.Height + $spaceBetween))
-$tabPage3.Controls.Add($langchainApiKeyLabel)
-
-#Criando TextBox para API-KEY - LangChain
-$langchainApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$langchainApiKeyTextBox.Text = $env:LANGCHAIN_API_KEY
-$langchainApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$langchainApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$langchainApiKeyLabel.ClientSize.Height)
-$langchainApiKeyTextBox.Location = New-Object System.Drawing.Point(($langchainApiKeyLabel.Location.X + $langchainApiKeyLabel.ClientSize.Width + $spaceBetween), $langchainApiKeyLabel.Location.Y)
-$langchainApiKeyTextBox.Name = "LANGCHAIN_API_KEY"
-$tabPage3.Controls.Add($langchainApiKeyTextBox)
-
-#Criando Label para API-KEY - Tavily
-$tavilyApiKeyLabel = New-Object System.Windows.Forms.Label
-$tavilyApiKeyLabel.Text = "Tavily:"
-$tavilyApiKeyLabel.AutoSize = $true
-$tavilyApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($langchainApiKeyLabel.Location.Y + $langchainApiKeyLabel.ClientSize.Height + $spaceBetween))
-$tabPage3.Controls.Add($tavilyApiKeyLabel)
-
-#Criando TextBox para API-KEY - Tavily
-$tavilyApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$tavilyApiKeyTextBox.Text = $env:TAVILY_API_KEY
-$tavilyApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$tavilyApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$tavilyApiKeyLabel.ClientSize.Height)
-$tavilyApiKeyTextBox.Location = New-Object System.Drawing.Point(($tavilyApiKeyLabel.Location.X + $tavilyApiKeyLabel.ClientSize.Width + $spaceBetween), $tavilyApiKeyLabel.Location.Y)
-$tavilyApiKeyTextBox.Name = "TAVILY_API_KEY"
-$tabPage3.Controls.Add($tavilyApiKeyTextBox)
-
-
-#Criando Label para API-KEY - Cohere
-$cohereApiKeyLabel = New-Object System.Windows.Forms.Label
-$cohereApiKeyLabel.Text = "Cohere:"
-$cohereApiKeyLabel.AutoSize = $true
-$cohereApiKeyLabel.Location = New-Object System.Drawing.Point($horizontalPadding,($tavilyApiKeyLabel.Location.Y + $tavilyApiKeyLabel.ClientSize.Height + $spaceBetween))
-$tabPage3.Controls.Add($cohereApiKeyLabel)
-
-#Criando TextBox para API-KEY - Cohere
-$cohereApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-$cohereApiKeyTextBox.Text = $env:COHERE_API_KEY
-$cohereApiKeyTextBox.Size = New-Object System.Drawing.Size(($windowWidth-20-$cohereApiKeyLabel.ClientSize.Width - $spaceBetween - (2*$horizontalPadding)),$cohereApiKeyLabel.ClientSize.Height)
-$cohereApiKeyTextBox.Location = New-Object System.Drawing.Point(($cohereApiKeyLabel.Location.X + $cohereApiKeyLabel.ClientSize.Width + $spaceBetween), $cohereApiKeyLabel.Location.Y)
-$cohereApiKeyTextBox.Name = "COHERE_API_KEY"
-$tabPage3.Controls.Add($cohereApiKeyTextBox)
-
-#Criando Botão para atualizar API-Keys
-$apiKeysUpdateBtn = New-Object System.Windows.Forms.Button
-$apiKeysUpdateBtn.Text = "Atualizar Chaves"
-$apiKeysUpdateBtn.AutoSize = $true
-$tabPage3.Controls.Add($apiKeysUpdateBtn)
-$apiKeysUpdateBtn.Location = New-Object System.Drawing.Point(($windowWidth -30- $apiKeysUpdateBtn.ClientSize.Width - (2*$horizontalPadding)),($cohereApiKeyTextBox.Location.Y + $cohereApiKeyTextBox.ClientSize.Height + $spaceBetween))
-
-#Adicionando Função para atualizar API-Keys
-
-
-
-$apiKeysUpdateBtn.Add_Click({
-    $apiKeysTextBoxes = @($groqApiKeyTextBox,$langchainApiKeyTextBox,$tavilyApiKeyTextBox,$cohereApiKeyTextBox)
-
-    # # Ler o conteúdo do arquivo .env
-    $dotenvContent = Get-Content -Path "$($env:commonPathBot)\.env"
-
-    $apiKeysUpdatedContent = $dotenvContent
-
-    foreach ($keyTextBox in $apiKeysTextBoxes) {
-        # Definir a chave que você quer alterar e o novo valor
-        $key = $keyTextBox.Name
-        $newValue = $keyTextBox.Text
-
-        # Atualizar a linha correspondente à chave usando regex
-        $apiKeysUpdatedContent = $apiKeysUpdatedContent -replace "($key\s*=\s*).*", "`$1$newValue"
-    }
-
-    # Salvar as alterações de volta no arquivo .env
-    Set-Content -Path $envPath -Value $apiKeysUpdatedContent
-
-    # Write-Output "O arquivo .env foi atualizado com sucesso!"
-
-})
-
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
+    Cleanup
     Start-NodeProcess
-    # Start-PythonProcess 
-
     $mainTabStatus.Text = "Iniciando chatBot"
 }
 
 $restartButton.Add_Click{
     Cleanup
     Start-NodeProcess
-    # Start-PythonProcess
-
     $mainTabStatus.Text = "Reiniciando..."
 
 }
@@ -770,8 +425,6 @@ $turnOffButton.Add_Click{
 #Adicionando Abas ao tab Control
 $tabControl.TabPages.Add($mainTab)
 $tabControl.TabPages.Add($tabPage1)
-# $tabControl.TabPages.Add($tabPage2)
-# $tabControl.TabPages.Add($tabPage3)
 
 #Adicionar TabControl no Form
 $form.Controls.Add($tabControl)
@@ -788,8 +441,6 @@ $form.add_FormClosing({
     
     Write-Host "A janela está prestes a ser fechada."
     
-    # Você pode cancelar o fechamento da janela configurando $e.Cancel = $true
-    # $e.Cancel = $true
     $botStatusChecktimer.Stop()
     Cleanup
 
