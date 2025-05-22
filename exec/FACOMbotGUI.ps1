@@ -44,7 +44,7 @@ function Start-NodeProcess {
 
     try {
         Start-Sleep -Seconds 20
-        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop
+        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop -WindowStyle Hidden
 
         # Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
@@ -56,7 +56,7 @@ function Start-NodeProcess {
 
 # Função que será chamada na limpeza
 function Cleanup {
-    Write-Host "`nIniciando operações de limpeza..."
+    # Write-Host "`nIniciando operações de limpeza..."
     
     try {
         # Write-Host "A execução do script foi interrompida em: $(Get-Date)"
@@ -64,7 +64,7 @@ function Cleanup {
         Stop-NodeProcess
         # Stop-PythonProcess
 
-        Write-Host "Removendo arquivos temporários..."
+        # Write-Host "Removendo arquivos temporários..."
         # Especificar o caminho da pasta
         $pasta =  "$($env:commonPathBot)\venom_bot\tokens"
         # Write-Host $pasta
@@ -79,7 +79,7 @@ function Cleanup {
         Add-Content -Path $logsPath -Value "$(Get-Date) erro: $($_)"
     }
     finally {
-        Write-Host "Operações de limpeza concluídas" -ForegroundColor Green
+        # Write-Host "Operações de limpeza concluídas" -ForegroundColor Green
     }
 }
 
@@ -403,7 +403,6 @@ $tabPage1.Controls.Add($updateMenuButton)
 
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
-    Cleanup
     Start-NodeProcess
     $mainTabStatus.Text = "Iniciando chatBot"
 }

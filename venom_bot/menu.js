@@ -8,7 +8,9 @@ const initial = (chat,message) => {
 }
 
 const stateOne = (chat,message)=>{
-    return "Escolha uma das opções abaixo:\n\n" + dados[message]?.subtopics.map((topic,index) => `${index + 1} ${topic.name}`).join("\n") + "\n\nDigite 0 para retornar ao menu anterior"
+    const response = dados[message]?.subtopics.map((topic,index) => `${index + 1} ${topic.name}`).join("\n")
+
+    return response ? "Escolha uma das opções abaixo:\n\n" + response + "\n\nDigite 0 para retornar ao menu anterior" : response
 }
 
 const stateTwo = (chat,message)=>{

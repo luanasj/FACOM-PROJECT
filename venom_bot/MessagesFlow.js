@@ -12,17 +12,23 @@ const messageHandler = async (message) =>{
 
 
   if((message.body == "0") && (chat.state > 0)) {
-    await updateOption(phoneNumber,null)
     await updateChatState(phoneNumber,-1,content.length-1)
+    await updateOption(phoneNumber,null)
 
-    return content[parseInt(chat.state)](chat,message.body)
+    const response = content[chat.state](chat,message.body)
+
+    if(!parseInt(chat.state)) await updateChatState(phoneNumber,1,content.length-1)
+
+
+    return response
+
   }
 
   const response = content[chat.state](chat,parseInt(message.body)-1)
 
   if(response) {
-    await updateOption(phoneNumber,parseInt(message.body)-1)
     await updateChatState(phoneNumber,1,content.length-1)
+    await updateOption(phoneNumber,parseInt(message.body)-1)
     return response
   }
 
