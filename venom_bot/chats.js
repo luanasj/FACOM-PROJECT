@@ -12,7 +12,7 @@ const conversationEnding = (tel)=>{
 
     if(chats[chatIndex].timeout) clearTimeout(chats[chatIndex].timeout);
 
-    return setTimeout(chatRemoval,225000,[tel])
+    return setTimeout(chatRemoval,450000,[tel])
 }
 
 
