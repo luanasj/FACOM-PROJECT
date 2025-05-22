@@ -86,7 +86,7 @@ function Cleanup {
         # Write-Host "A execução do script foi interrompida em: $(Get-Date)"
         
         Stop-NodeProcess
-        Stop-PythonProcess
+        # Stop-PythonProcess
 
         Write-Host "Removendo arquivos temporários..."
         # Especificar o caminho da pasta
@@ -113,10 +113,10 @@ function Cleanup {
 function Update-Status {
 
     try {
-       Get-Process -Name "python" -ErrorAction Stop
+    #    Get-Process -Name "python" -ErrorAction Stop
        Get-Process -Name "node" -ErrorAction Stop
 
-       return "Chatbot: Processos ativos."
+       return "Chatbot ativo."
     }
     catch {
         return "Por favor inicie o chatbot"
@@ -212,7 +212,9 @@ $phoneNumberUpdateBtn.Add_Click(
         if(($phoneNumber.Text.Length -eq 13) -and ($phoneNumber.Text -match '^\d+$')){
             $invalidNumberWarning.Text = ""
 
-            $newPhoneNumberToJSON = @{phoneNumber=$phoneNumber.Text} | ConvertTo-Json
+            $utilInfoContent.phoneNumber = $phoneNumber.Text
+
+            $newPhoneNumberToJSON = $utilInfoContent | ConvertTo-Json
 
             Set-Content -Encoding utf8 -Path $utilInfoJSONPath -Value $newPhoneNumberToJSON
         } else {
@@ -231,11 +233,51 @@ $phoneNumber.Location = New-Object System.Drawing.Point(($phoneNumberInicialPosX
 $phoneNumberUpdateBtn.Location = New-Object System.Drawing.Point(($phoneNumber.Location.X+$phoneNumber.ClientSize.Width + $spaceBetween),$phoneNumberInicialPosY)
 $invalidNumberWarning.Location = New-Object System.Drawing.Point($phoneNumber.Location.X,($phoneNumber.Location.Y+$phoneNumber.ClientSize.Height+10))
 
+##Criando campo para atualizar saudação inicial
+$greetingText = New-Object System.Windows.Forms.TextBox
+# $greetingText.PlaceholderText = "ex: 5511947270112"
+$greetingText.Text = $utilInfoContent.greetingText
+$greetingText.Size = New-Object System.Drawing.Size(200,60)
+$greetingText.Multiline = $true
+$mainTab.Controls.Add($greetingText)
+
+#Criando Label para a saudação
+$greetingTextLabel = New-Object System.Windows.Forms.Label
+$greetingTextLabel.Text = "Saudação:"
+$greetingTextLabel.AutoSize = $true
+$greetingTextLabel.Font = New-Object System.Drawing.Font("Arial",10,[System.Drawing.FontStyle]::Bold)
+$mainTab.Controls.Add($greetingTextLabel)
+
+#Criando botão para atualizar número de celular
+$greetingTextUpdateBtn = New-Object System.Windows.Forms.Button
+$greetingTextUpdateBtn.Text = "Atualizar"
+$greetingTextUpdateBtn.AutoSize = $true
+$greetingTextUpdateBtn.Add_Click(
+    {
+
+            $utilInfoContent.greetingText = $greetingText.Text
+
+            $newGreetingTextToJSON = $utilInfoContent | ConvertTo-Json
+
+            Set-Content -Encoding utf8 -Path $utilInfoJSONPath -Value $newGreetingTextToJSON
+    }
+)
+$mainTab.Controls.Add($greetingTextUpdateBtn)
+
+#Posicionando os campos de saudação
+$greetingTextInicialPosX = ($windowWidth-$greetingText.ClientSize.Width-$greetingTextLabel.ClientSize.Width-$greetingTextUpdateBtn.ClientSize.Width-(2*$spaceBetween))/2
+$greetingTextInicialPosY = $phoneNumber.Location.Y + $phoneNumber.ClientSize.Height + $spaceBetween  
+$greetingTextLabel.Location = New-Object System.Drawing.Point($greetingTextInicialPosX,$greetingTextInicialPosY)
+$greetingText.Location = New-Object System.Drawing.Point(($phoneNumber.Location.X),$greetingTextInicialPosY)
+$greetingTextUpdateBtn.Location = New-Object System.Drawing.Point(($greetingText.Location.X+$greetingText.ClientSize.Width + $spaceBetween),$greetingTextInicialPosY)
+$invalidNumberWarning.Location = New-Object System.Drawing.Point($greetingText.Location.X,($greetingText.Location.Y+$greetingText.ClientSize.Height+10))
+
+
 #Criando botão para iniciar programa
 $startButton = New-Object System.Windows.Forms.Button
 $startButton.Text = "Iniciar Bot"
 $startButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
-$startButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(1/4)))
+$startButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-200)*(2/4)))
 $startButton.BackColor = [System.Drawing.Color]::FromArgb(255, 204,255,153) # Alfa, Vermelho, Verde, Azul
 $mainTab.Controls.Add($startButton)
 
@@ -243,7 +285,7 @@ $mainTab.Controls.Add($startButton)
 $restartButton = New-Object System.Windows.Forms.Button
 $restartButton.Text = "Reiniciar Bot"
 $restartButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
-$restartButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(2/4)))
+$restartButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-200)*(3/4)))
 $restartButton.BackColor = [System.Drawing.Color]::FromArgb(255, 255,255,74)
 $mainTab.Controls.Add($restartButton)
 
@@ -251,7 +293,7 @@ $mainTab.Controls.Add($restartButton)
 $turnOffButton = New-Object System.Windows.Forms.Button
 $turnOffButton.Text = "Desligar Bot"
 $turnOffButton.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
-$turnOffButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-100)*(3/4)))
+$turnOffButton.Location = New-Object System.Drawing.Point((($windowWidth - $buttonWidth)/2),(($windowHeight-200)*(4/4)))
 $turnOffButton.BackColor = [System.Drawing.Color]::FromArgb(255, 255,50,43)
 $mainTab.Controls.Add($turnOffButton)
 
@@ -704,7 +746,7 @@ $apiKeysUpdateBtn.Add_Click({
 #Adicionando as Funções dos Botões do início
 $startButton.Add_Click{
     Start-NodeProcess
-    Start-PythonProcess 
+    # Start-PythonProcess 
 
     $mainTabStatus.Text = "Iniciando chatBot"
 }
@@ -712,7 +754,7 @@ $startButton.Add_Click{
 $restartButton.Add_Click{
     Cleanup
     Start-NodeProcess
-    Start-PythonProcess
+    # Start-PythonProcess
 
     $mainTabStatus.Text = "Reiniciando..."
 

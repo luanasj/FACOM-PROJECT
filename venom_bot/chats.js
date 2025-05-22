@@ -20,7 +20,7 @@ const getChat = (tel)=>{
    return chats.find(value => value.tel == tel)
 }
 
-const updateChatState = (tel,increment,maxState)=>{
+const updateChatState = async (tel,increment,maxState)=>{
     
     const chatIndex = chats.indexOf(getChat(tel))
 
@@ -33,12 +33,14 @@ const updateChatState = (tel,increment,maxState)=>{
         chats[chatIndex].timeout = conversationEnding(tel)
     }
 
+    return
 }
 
-const updateOption = (tel,option)=>{
+const updateOption = async (tel,option)=>{
     const chatIndex = chats.indexOf(getChat(tel))
     chats[chatIndex].option = option ?? null
 
+    return
 }
 
 const addChat = (tel) =>{

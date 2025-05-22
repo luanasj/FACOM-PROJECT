@@ -58,7 +58,7 @@
 const {getChat,updateChatState,updateOption,addChat} = require("./chats")
 const {content} = require("./menu")
 
-const messageHandler = (message) =>{
+const messageHandler = async (message) =>{
   const phoneNumber = message.from
 
   if(!getChat(phoneNumber)) {
@@ -69,8 +69,8 @@ const messageHandler = (message) =>{
 
 
   if((message.body == "0") && (chat.state > 0)) {
-    updateOption(phoneNumber,null)
-    updateChatState(phoneNumber,-1,content.length-1)
+    await updateOption(phoneNumber,null)
+    await updateChatState(phoneNumber,-1,content.length-1)
 
     return content[parseInt(chat.state)](chat,message.body)
   }
@@ -78,8 +78,8 @@ const messageHandler = (message) =>{
   const response = content[chat.state](chat,parseInt(message.body)-1)
 
   if(response) {
-    updateOption(phoneNumber,parseInt(message.body)-1)
-    updateChatState(phoneNumber,1,content.length-1)
+    await updateOption(phoneNumber,parseInt(message.body)-1)
+    await updateChatState(phoneNumber,1,content.length-1)
     return response
   }
 
@@ -103,8 +103,8 @@ function answerToMedia(client,message){
   sendTextToUser(client,message,response) 
 }
 
-function tradeMessageWithChatbot(client,message) {
-  const response = messageHandler(message)
+async function tradeMessageWithChatbot(client,message) {
+  const response = await messageHandler(message)
   sendTextToUser(client,message,response)
 }
 
