@@ -66,17 +66,11 @@ const messageHandler = (message) =>{
   }
 
   let chat = getChat(phoneNumber)
-  // console.log(chat)
 
 
   if((message.body == "0") && (chat.state > 0)) {
     updateOption(phoneNumber,null)
     updateChatState(phoneNumber,-1,content.length-1)
-
-    // console.log("Estado antes:", chat.state)
-    // chat = getChat(phoneNumber)
-    // console.log("Estado depois:", chat.state)
-
 
     return content[parseInt(chat.state)](chat,message.body)
   }
@@ -89,18 +83,17 @@ const messageHandler = (message) =>{
     return response
   }
 
-  return "Resposta inválida, por favor responda com o número referente a uma das opções";
+  return "Opção inválida, por favor tente novamente ou digite 0 para retornar ao menu anterior";
 }
 
 function sendTextToUser(client,message,answer){
   client
           .sendText(message.from, answer)
           .then((result) => {
-            // console.log('Result: ', result); //return object success
             return
           })
           .catch((erro) => {
-            console.error('Error when sending: ', erro); //return object error
+            console.error('Error when sending: ', erro); 
           });
 }
 
