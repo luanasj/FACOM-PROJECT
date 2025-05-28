@@ -14,7 +14,7 @@ const stateOne = (chat,message)=>{
 }
 
 const stateTwo = (chat,message)=>{
-    const response = dados[chat.option]?.subtopics[message]?.description
+    const response = dados[chat.option[0]]?.subtopics[message]?.description
 
     return  response ? response + "\n\nDigite 0 para retornar ao menu anterior" : response
 }

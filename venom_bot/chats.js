@@ -1,10 +1,26 @@
 const chats = new Array()
 
-const chatRemoval = (tel)=>{
+const chatRemovalNotice = async (chatIndex)=>{
+    const chat = chats[chatIndex]
+    await chat.client
+          .sendText(`${chat.tel}@c.us`,"Essa conversa está sendo finalizada por inatividade. Para iniciar novamente, envie uma mensagem de texto.")
+          .then((result) => {
+            return
+          })
+          .catch((erro) => {
+            console.error('Error when sending: ', erro); 
+          });
+}
+
+const chatRemoval = async (tel)=>{
     const chatIndex = chats.indexOf(getChat(tel))
+    
+    await chatRemovalNotice(chatIndex)
+
     chats.splice(chatIndex,1)
-    console.log("removendo chat tel:",tel)
-    console.log(chatIndex)
+
+    // console.log("removendo chat tel:",tel)
+    // console.log(chatIndex)
 }
 
 const conversationEnding = (tel)=>{
@@ -38,17 +54,27 @@ const updateChatState = async (tel,increment,maxState)=>{
 
 const updateOption = async (tel,option)=>{
     const chatIndex = chats.indexOf(getChat(tel))
-    chats[chatIndex].option = option ?? null
+
+    const rollback = (chatIndex)=>{
+        chats[chatIndex].option.shift()
+    }
+
+    const forward = (chatIndex,option)=>{
+        chats[chatIndex].option.unshift(option-1)
+    }
+
+    option ? forward(chatIndex,option) : rollback(chatIndex) ;
 
     return
 }
 
-const addChat = (tel) =>{
+const addChat = (tel,client) =>{
     chats.push({
             tel: tel,
             state: 0,
-            option:null,
-            timeout: 0
+            option:[],
+            timeout: 0,
+            client: client
     })
 }
 

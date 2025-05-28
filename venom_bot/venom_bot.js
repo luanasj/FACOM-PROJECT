@@ -9,10 +9,12 @@ function start(client) {
 
   //Se comunica com o chatbot
   client.onMessage(async (message) => {
-    if (message.type == 'chat') {
-        tradeMessageWithChatbot(client,message)
-    }else{
-        answerToMedia(client,message)
+    if(!message.isGroupMsg){
+      if (message.type == 'chat') {
+          tradeMessageWithChatbot(client,message)
+      }else{
+          answerToMedia(client,message)
+      }
     }
   });
 
