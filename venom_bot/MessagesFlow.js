@@ -1,4 +1,4 @@
-const { ChatState } = require("venom-bot")
+const {ChatState} = require("venom-bot")
 const {getChat,updateChatState,updateOption,addChat} = require("./chats")
 const {content} = require("./menu")
 

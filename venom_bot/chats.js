@@ -3,7 +3,7 @@ const chats = new Array()
 const chatRemovalNotice = async (chatIndex)=>{
     const chat = chats[chatIndex]
     await chat.client
-          .sendText(`${chat.tel}@c.us`,"Essa conversa está sendo finalizada por inatividade. Para iniciar novamente, envie uma mensagem de texto.")
+          .sendText(chat.tel,"Essa conversa está sendo finalizada por inatividade. Para iniciar novamente, envie uma mensagem de texto.")
           .then((result) => {
             return
           })
@@ -29,6 +29,8 @@ const conversationEnding = (tel)=>{
     if(chats[chatIndex].timeout) clearTimeout(chats[chatIndex].timeout);
 
     return setTimeout(chatRemoval,6*900000,[tel])
+    // return setTimeout(chatRemoval,450000,[tel])
+
 }
 
 
