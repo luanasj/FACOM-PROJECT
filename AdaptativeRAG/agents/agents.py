@@ -68,7 +68,6 @@ agent_router = agent_prompt | structured_llm_decision_maker
 #VectorStore content description
 
 
-
 from RAG.tools import vectorstoreContent
 
 # Prompt

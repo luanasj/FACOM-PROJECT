@@ -46,7 +46,16 @@ const messageHandler = async (message,client) =>{
   return "Opção inválida, por favor tente novamente ou digite 0 para retornar ao menu anterior.";
 }
 
+const messagesSent = new Set();
+
+
 function sendTextToUser(client,message,answer){
+  const chave = `${message.from}-${answer}`;
+  if (messagesSent.has(chave)) return;
+
+  messagesSent.add(chave);
+  setTimeout(() => messagesSent.delete(chave), 30000);
+
   client
           .sendText(message.from, answer)
           .then((result) => {

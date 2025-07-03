@@ -10,12 +10,13 @@ function start(client) {
   //Se comunica com o chatbot
   client.onMessage(async (message) => {
     if(!message.isGroupMsg){
-      if (message.type == 'chat') {
+      if (['chat','conversation','extendedTextMessage'].includes(message.type)) {
           tradeMessageWithChatbot(client,message)
       }else{
           answerToMedia(client,message)
       }
     }
+    // console.log(message)
   });
 
   // Ajuda a menter a sessãoo ativa
@@ -61,6 +62,3 @@ venom
   .catch((erro) => {
     console.log(erro);
   });
-
-
-
