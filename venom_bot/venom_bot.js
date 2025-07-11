@@ -14,7 +14,7 @@ function start(client) {
           tradeMessageWithChatbot(client,message)
       }else{
           answerToMedia(client,message)
-          log(message)
+          log(message.type)
       }
     }
     // console.log(message)
