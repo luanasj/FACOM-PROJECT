@@ -1,6 +1,6 @@
 const venom = require('venom-bot')
 const {tradeMessageWithChatbot,answerToMedia} = require('./MessagesFlow.js')
-const WppCounter = require('./utils.js')
+const {WppCounter,log} = require('./utils.js')
 
 function start(client) {
 
@@ -14,6 +14,7 @@ function start(client) {
           tradeMessageWithChatbot(client,message)
       }else{
           answerToMedia(client,message)
+          log(message)
       }
     }
     // console.log(message)

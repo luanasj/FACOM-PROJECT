@@ -1,4 +1,5 @@
 const dados = require('../assets/utilInfo.json')
+const fs = require('fs')
 
 class WppCounter{
     FACOMnumber = dados.phoneNumber
@@ -11,4 +12,17 @@ class WppCounter{
 
 }
 
-module.exports = WppCounter
+const logStream = fs.createWriteStream('logs.txt', { flags: 'a' }); // 'a' = append
+
+function log(message) {
+  const timestamp = new Date().toISOString();
+  try {
+      logStream.write(`[${timestamp}] ${message}\n`);
+  } catch {
+    // 
+  }
+}
+
+
+
+module.exports = {WppCounter,log}
