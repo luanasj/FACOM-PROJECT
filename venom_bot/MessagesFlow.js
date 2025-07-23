@@ -15,6 +15,9 @@ const messageHandler = async (message,client) =>{
   if((message.body == "0") && (chat.state > 0)) {
     // console.log("chat state",chat.state)
     // console.log("chat options",chat.options)
+    const previousState = chat.state
+    const previousOption = chat.option?.[1]
+
     await updateChatState(phoneNumber,-1,content.length)
     await updateOption(phoneNumber,null)
     
@@ -52,11 +55,11 @@ const messagesSent = new Set();
 
 
 function sendTextToUser(client,message,answer){
-  const chave = `${message.from}-${answer}`;
-  if (messagesSent.has(chave)) return;
+  // const chave = `${message.from}-${answer}`;
+  // if (messagesSent.has(chave)) return;
 
-  messagesSent.add(chave);
-  setTimeout(() => messagesSent.delete(chave), 30000);
+  // messagesSent.add(chave);
+  // setTimeout(() => messagesSent.delete(chave), 30000);
 
   client
           .sendText(message.from, answer)
