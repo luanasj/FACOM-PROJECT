@@ -18,14 +18,16 @@ const messageHandler = async (message,client) =>{
     await updateChatState(phoneNumber,-1,content.length)
     await updateOption(phoneNumber,null)
     
-    if(!parseInt(chat.state)) await updateChatState(phoneNumber,1,content.length)
+    // 🛠️ Atualiza o objeto após alteração
+    chat = getChat(phoneNumber)
 
-    const response = content[chat.state-1](chat,chat.option[0])
-    // console.log("response",response)
-    // console.log("chat state",chat.state)
-    // console.log("chat options",chat.option)
+    if(!parseInt(chat.state)) {
+      await updateChatState(phoneNumber,1,content.length)
+      chat = getChat(phoneNumber) // Atualiza de novo, se necessário
+    }
+
+    const response = content[chat.state - 1](chat, chat.option?.[0])
     return response
-
   }
 
   const response = content[chat.state] ? content[chat.state](chat,parseInt(message.body)-1) : undefined;
