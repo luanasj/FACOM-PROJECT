@@ -12,8 +12,9 @@ function start(client) {
     if(!message.isGroupMsg){
       if (['chat','conversation','extendedTextMessage'].includes(message.type)) {
           tradeMessageWithChatbot(client,message)
-      }else if(["e2e_notification","notification_template","ciphertext"].includes(message.type)){
+      }else if(["e2e_notification","notification_template","ciphertext","video"].includes(message.type)){
         //nothing happens here
+          log(message.type)
       } else{
           answerToMedia(client,message)
           log(message.type)
