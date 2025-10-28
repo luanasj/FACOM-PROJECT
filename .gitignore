@@ -3,3 +3,5 @@ node_modules/
 tokens/
 __pycache__/
 .vscode
+.wwebjs_cache
+.wwebjs_cache/

@@ -20,8 +20,6 @@ function start(client) {
           log(message.type)
       }
     }
-    console.log(message)
-    log("message arrived")
   });
 
   // Ajuda a menter a sessãoo ativa

@@ -21,7 +21,9 @@ foreach ($line in $envContent) {
     [System.Environment]::SetEnvironmentVariable($key, $value)
 }
 
-$nodeCommand = "-NoExit -Command `"Set-Location $($env:commonPathBot)\venom_bot; node venom_bot.js`""
+# $nodeCommand = "-NoExit -Command `"Set-Location $($env:commonPathBot)\venom_bot; node venom_bot.js`""
+
+$nodeCommand = "-NoExit -Command `"Set-Location $($env:commonPathBot)\wwebjs; node bot.js`""
 $pyhtonCommand = "-NoExit -Command uvicorn --app-dir $($env:commonPathBot)\AdaptativeRAG langchain_bot:asgi_app --host 127.0.0.1 --port 5000 --workers 4"
 $logsPath = $env:commonPathBot + "\exec\logs.txt"
 
@@ -66,7 +68,9 @@ function Cleanup {
 
         # Write-Host "Removendo arquivos temporários..."
         # Especificar o caminho da pasta
-        $pasta =  "$($env:commonPathBot)\venom_bot\tokens"
+        # $pasta =  "$($env:commonPathBot)\venom_bot\tokens"
+        $pasta =  "$($env:commonPathBot)\wwebjs\.wwebjs_cache"
+
         # Write-Host $pasta
 
         # Deletar a pasta e todos os seus conteúdos
