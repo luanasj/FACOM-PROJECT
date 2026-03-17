@@ -46,7 +46,7 @@ function Start-NodeProcess {
 
     try {
         Start-Sleep -Seconds 20
-        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop -WindowStyle Hidden
+        $global:nodeProcess = Start-Process powershell -ArgumentList $nodeCommand  -PassThru -ErrorAction Stop #-WindowStyle Hidden
 
         # Write-Output "Node.js process started with ID: $($global:nodeProcess.Id)"
     } catch {
