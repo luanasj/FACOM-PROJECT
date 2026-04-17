@@ -1,6 +1,84 @@
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
+// Toast + busy-state helpers
+const TOAST_STYLES = {
+	success: 'bg-emerald-600 text-white',
+	error: 'bg-rose-600 text-white',
+	info: 'bg-slate-800 text-white',
+};
+function showToast(message, type = 'info') {
+	const container = $('#toast-container');
+	if (!container) return;
+	const toast = document.createElement('div');
+	toast.className = `pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-opacity duration-300 ${TOAST_STYLES[type] || TOAST_STYLES.info}`;
+	toast.textContent = message;
+	container.appendChild(toast);
+	setTimeout(() => { toast.style.opacity = '0'; }, 2700);
+	setTimeout(() => { toast.remove(); }, 3100);
+}
+
+const SPINNER_SVG = '<svg class="animate-spin h-5 w-5 inline-block -mt-0.5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>';
+
+function setButtonBusy(button, busyText) {
+	const label = button.querySelector('.btn-label');
+	if (label && button.dataset._origLabel == null) {
+		button.dataset._origLabel = label.innerHTML;
+		label.innerHTML = `${SPINNER_SVG}${busyText}`;
+	}
+	button.disabled = true;
+}
+function clearButtonBusy(button) {
+	const label = button.querySelector('.btn-label');
+	if (label && button.dataset._origLabel != null) {
+		label.innerHTML = button.dataset._origLabel;
+		delete button.dataset._origLabel;
+	}
+	button.disabled = false;
+}
+
+let actionBusy = false;
+async function withAction(clickedBtn, busyText, fn, messages = {}) {
+	if (actionBusy) return;
+	actionBusy = true;
+	const actionButtons = $$('.action-btn');
+	actionButtons.forEach((b) => { b.disabled = true; });
+	setButtonBusy(clickedBtn, busyText);
+	try {
+		const res = await fn();
+		if (res && res.ok === false) {
+			showToast(messages.error || res.error || 'Falha na operação.', 'error');
+		} else {
+			showToast(messages.success || 'Operação concluída.', 'success');
+		}
+	} catch (err) {
+		console.error(err);
+		showToast(messages.error || `Erro: ${err.message || err}`, 'error');
+	} finally {
+		clearButtonBusy(clickedBtn);
+		actionButtons.forEach((b) => { b.disabled = false; });
+		actionBusy = false;
+	}
+}
+
+async function withSaveBusy(clickedBtn, fn, messages = {}) {
+	setButtonBusy(clickedBtn, 'Salvando…');
+	try {
+		const res = await fn();
+		if (res && res.ok === false) {
+			showToast(messages.error || res.error || 'Falha ao salvar.', 'error');
+			return res;
+		}
+		showToast(messages.success || 'Salvo com sucesso.', 'success');
+		return res;
+	} catch (err) {
+		console.error(err);
+		showToast(`Erro: ${err.message || err}`, 'error');
+	} finally {
+		clearButtonBusy(clickedBtn);
+	}
+}
+
 // Navigation
 function showPage(name) {
 	$$('.page').forEach((p) => p.classList.add('hidden-page'));
@@ -59,32 +137,45 @@ async function loadUtilInfo() {
 	$('#saudacao').value = info.greetingText || '';
 }
 
-async function saveUtilInfo(msgId) {
-	const res = await window.facom.saveUtilInfo({
-		phoneNumber: $('#celular').value,
-		greetingText: $('#saudacao').value,
-	});
+async function saveUtilInfo(btn, msgId) {
+	const res = await withSaveBusy(
+		btn,
+		() => window.facom.saveUtilInfo({
+			phoneNumber: $('#celular').value,
+			greetingText: $('#saudacao').value,
+		}),
+		{ success: 'Configuração atualizada.', error: 'Não foi possível salvar.' }
+	);
+	if (!res) return;
 	if (res.ok) showMessage(msgId, 'Atualizado com sucesso.', true);
 	else showMessage(msgId, res.error || 'Erro ao salvar.', false);
 }
 
-$('#btn-save-phone').addEventListener('click', () => saveUtilInfo('celular-msg'));
-$('#btn-save-greeting').addEventListener('click', () => saveUtilInfo('saudacao-msg'));
+$('#btn-save-phone').addEventListener('click', (e) => saveUtilInfo(e.currentTarget, 'celular-msg'));
+$('#btn-save-greeting').addEventListener('click', (e) => saveUtilInfo(e.currentTarget, 'saudacao-msg'));
 
 // Bot controls
-async function withStatus(fn, transientText) {
-	$('#status-text').textContent = transientText;
-	try { await fn(); } catch (err) { console.error(err); }
-}
-$('#btn-start').addEventListener('click', () =>
-	withStatus(() => window.facom.startBot(), 'Iniciando chatBot...')
-);
-$('#btn-restart').addEventListener('click', () =>
-	withStatus(() => window.facom.restartBot(), 'Reiniciando...')
-);
-$('#btn-stop').addEventListener('click', () =>
-	withStatus(() => window.facom.stopBot(), 'Desativando chatbot, por favor aguarde...')
-);
+$('#btn-start').addEventListener('click', (e) => {
+	$('#status-text').textContent = 'Iniciando chatBot...';
+	return withAction(e.currentTarget, 'Iniciando…', () => window.facom.startBot(), {
+		success: 'Bot iniciado.',
+		error: 'Falha ao iniciar o bot.',
+	});
+});
+$('#btn-restart').addEventListener('click', (e) => {
+	$('#status-text').textContent = 'Reiniciando...';
+	return withAction(e.currentTarget, 'Reiniciando…', () => window.facom.restartBot(), {
+		success: 'Bot reiniciado.',
+		error: 'Falha ao reiniciar o bot.',
+	});
+});
+$('#btn-stop').addEventListener('click', (e) => {
+	$('#status-text').textContent = 'Desativando chatbot, por favor aguarde...';
+	return withAction(e.currentTarget, 'Desligando…', () => window.facom.stopBot(), {
+		success: 'Bot desligado.',
+		error: 'Falha ao desligar o bot.',
+	});
+});
 
 // Menu Info editor
 let topics = [];
@@ -147,8 +238,13 @@ $('#btn-add-topic').addEventListener('click', () => {
 	renderTopics();
 });
 
-$('#btn-save-menu').addEventListener('click', async () => {
-	const res = await window.facom.saveMenuInfo(topics);
+$('#btn-save-menu').addEventListener('click', async (e) => {
+	const res = await withSaveBusy(
+		e.currentTarget,
+		() => window.facom.saveMenuInfo(topics),
+		{ success: 'Menu atualizado.', error: 'Falha ao atualizar o menu.' }
+	);
+	if (!res) return;
 	if (res.ok) showMessage('menu-msg', 'Menu atualizado com sucesso.', true);
 	else showMessage('menu-msg', res.error || 'Erro ao salvar.', false);
 });
