@@ -55,11 +55,7 @@ const messagesSent = new Set();
 
 
 function sendTextToUser(client,message,answer){
-  // const chave = `${message.from}-${answer}`;
-  // if (messagesSent.has(chave)) return;
-
-  // messagesSent.add(chave);
-  // setTimeout(() => messagesSent.delete(chave), 30000);
+  if (!message.from || message.from.endsWith('@broadcast')) return;
 
   client
           .sendMessage(message.from, answer)
@@ -67,7 +63,7 @@ function sendTextToUser(client,message,answer){
             return
           })
           .catch((erro) => {
-            console.error('Error when sending: ', erro); 
+            console.error('Error when sending: ', erro);
           });
 }
 

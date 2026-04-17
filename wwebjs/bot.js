@@ -22,6 +22,7 @@ client.on('message_create', message =>
 )
 
 client.on('message', message => {
+    if (message.from === 'status@broadcast' || message.isStatus) return;
 	if (message.body && (message.type === 'chat') && !isGroupMsg(message)) {
         tradeMessageWithChatbot(client,message)
 	} else {
