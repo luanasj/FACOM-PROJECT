@@ -1,15 +1,18 @@
 {
+	"name": "facom-bot",
+	"version": "2.0.0",
+	"description": "FACOM-bot desktop control panel",
+	"main": "electron/main.js",
+	"scripts": {
+		"start": "electron .",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
 	"dependencies": {
 		"whatsapp-web.js": "^1.34.6"
 	},
-	"name": "agents",
-	"version": "1.0.0",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+	"devDependencies": {
+		"electron": "^33.0.0"
 	},
-	"keywords": [],
 	"author": "",
-	"license": "ISC",
-	"description": ""
+	"license": "ISC"
 }
