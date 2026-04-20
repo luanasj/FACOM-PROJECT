@@ -1,20 +1,41 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
-const WWEBJS_DIR = path.join(ROOT, 'wwebjs');
+const DEV_ROOT = path.resolve(__dirname, '..');
+const IS_PACKAGED = app.isPackaged;
+const BUNDLED_ASSETS = IS_PACKAGED ? path.join(process.resourcesPath, 'assets') : path.join(DEV_ROOT, 'assets');
+const USER_ROOT = IS_PACKAGED ? app.getPath('userData') : DEV_ROOT;
+
+const ASSETS_DIR = path.join(USER_ROOT, 'assets');
+const WWEBJS_DIR = path.join(USER_ROOT, 'wwebjs');
 const CACHE_DIR = path.join(WWEBJS_DIR, '.wwebjs_cache');
-const ASSETS_DIR = path.join(ROOT, 'assets');
+const EXEC_DIR = path.join(USER_ROOT, 'exec');
 const UTIL_INFO_PATH = path.join(ASSETS_DIR, 'utilInfo.json');
 const EXTERNAL_INFO_PATH = path.join(ASSETS_DIR, 'externalInfo.json');
-const LOGS_PATH = path.join(ROOT, 'exec', 'logs.txt');
-const ENV_PATH = path.join(ROOT, '.env');
+const LOGS_PATH = path.join(EXEC_DIR, 'logs.txt');
+const ENV_PATH = path.join(USER_ROOT, '.env');
+const BOT_SCRIPT = path.join(app.getAppPath(), 'wwebjs', 'bot.js');
 
 let mainWindow = null;
 let botProcess = null;
 let statusInterval = null;
+
+function seedUserData() {
+	if (!IS_PACKAGED) return;
+	fs.mkdirSync(ASSETS_DIR, { recursive: true });
+	fs.mkdirSync(WWEBJS_DIR, { recursive: true });
+	fs.mkdirSync(EXEC_DIR, { recursive: true });
+	for (const name of ['utilInfo.json', 'externalInfo.json']) {
+		const dest = path.join(ASSETS_DIR, name);
+		const src = path.join(BUNDLED_ASSETS, name);
+		if (!fs.existsSync(dest) && fs.existsSync(src)) {
+			fs.copyFileSync(src, dest);
+		}
+	}
+}
 
 function loadDotEnv() {
 	if (!fs.existsSync(ENV_PATH)) return;
@@ -54,10 +75,13 @@ function startBot() {
 	}
 
 	try {
-		botProcess = spawn('node', ['bot.js'], {
+		botProcess = spawn(process.execPath, [BOT_SCRIPT], {
 			cwd: WWEBJS_DIR,
-			env: { ...process.env },
-			shell: process.platform === 'win32',
+			env: {
+				...process.env,
+				ELECTRON_RUN_AS_NODE: '1',
+				FACOM_ASSETS_DIR: ASSETS_DIR,
+			},
 			windowsHide: true,
 		});
 
@@ -134,6 +158,7 @@ function readJson(filePath, fallback) {
 }
 
 function writeJson(filePath, data) {
+	fs.mkdirSync(path.dirname(filePath), { recursive: true });
 	fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
@@ -199,10 +224,26 @@ function createWindow() {
 	mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
+function initAutoUpdater() {
+	if (!IS_PACKAGED) return;
+	autoUpdater.logger = {
+		info: (msg) => appendLog(`[updater] ${msg}`),
+		warn: (msg) => appendLog(`[updater][warn] ${msg}`),
+		error: (msg) => appendLog(`[updater][error] ${msg}`),
+		debug: () => {},
+	};
+	autoUpdater.autoDownload = true;
+	autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+		appendLog(`[updater] check failed: ${err.message}`);
+	});
+}
+
 app.whenReady().then(() => {
+	seedUserData();
 	loadDotEnv();
 	registerIpc();
 	createWindow();
+	initAutoUpdater();
 
 	statusInterval = setInterval(emitStatus, 5000);
 

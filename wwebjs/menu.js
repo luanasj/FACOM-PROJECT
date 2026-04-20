@@ -1,5 +1,9 @@
-const dados = require('../assets/externalInfo.json')
-const utilInfo = require("../assets/utilInfo.json")
+const fs = require('fs')
+const path = require('path')
+
+const ASSETS_DIR = process.env.FACOM_ASSETS_DIR || path.resolve(__dirname, '..', 'assets')
+const dados = JSON.parse(fs.readFileSync(path.join(ASSETS_DIR, 'externalInfo.json'), 'utf8'))
+const utilInfo = JSON.parse(fs.readFileSync(path.join(ASSETS_DIR, 'utilInfo.json'), 'utf8'))
 
 const initial = (chat,message) => {
     const initialText = utilInfo.greetingText+"\n\nEscolha uma das oções abaixo digitando o número da opção desejada.\n\n"
@@ -22,16 +26,3 @@ const stateTwo = (chat,message)=>{
 const content = [initial,stateOne,stateTwo]
 
 module.exports = {content}
-
-
-
-
-
-
-
-
-
-
-
-
-

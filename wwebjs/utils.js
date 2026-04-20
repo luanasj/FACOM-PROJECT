@@ -1,5 +1,8 @@
-const dados = require('../assets/utilInfo.json')
 const fs = require('fs')
+const path = require('path')
+
+const ASSETS_DIR = process.env.FACOM_ASSETS_DIR || path.resolve(__dirname, '..', 'assets')
+const dados = JSON.parse(fs.readFileSync(path.join(ASSETS_DIR, 'utilInfo.json'), 'utf8'))
 
 class WppCounter{
     FACOMnumber = dados.phoneNumber
@@ -19,7 +22,7 @@ function log(message) {
   try {
       logStream.write(`[${timestamp}] ${message}\n`);
   } catch {
-    // 
+    //
   }
 }
 
