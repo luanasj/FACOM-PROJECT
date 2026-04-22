@@ -19,7 +19,7 @@
 		"electron-builder": "^26.8.1"
 	},
 	"build": {
-		"appId": "br.com.leiaute.facom-bot",
+		"appId": "br.com.luanasj.facom-bot",
 		"productName": "FACOM-bot",
 		"directories": {
 			"output": "dist"
@@ -58,7 +58,7 @@
 			{
 				"provider": "github",
 				"owner": "luanasj",
-				"repo": "facom-bot"
+				"repo": "FACOM-PROJECT"
 			}
 		]
 	},
