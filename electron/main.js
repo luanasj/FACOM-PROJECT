@@ -3,6 +3,7 @@ const { autoUpdater } = require('electron-updater');
 const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { ensureChrome } = require('./browserSetup');
 
 const DEV_ROOT = path.resolve(__dirname, '..');
 const IS_PACKAGED = app.isPackaged;
@@ -13,6 +14,7 @@ const ASSETS_DIR = path.join(USER_ROOT, 'assets');
 const WWEBJS_DIR = path.join(USER_ROOT, 'wwebjs');
 const CACHE_DIR = path.join(WWEBJS_DIR, '.wwebjs_cache');
 const EXEC_DIR = path.join(USER_ROOT, 'exec');
+const PUPPETEER_CACHE_DIR = path.join(app.getPath('userData'), 'puppeteer-cache');
 const UTIL_INFO_PATH = path.join(ASSETS_DIR, 'utilInfo.json');
 const EXTERNAL_INFO_PATH = path.join(ASSETS_DIR, 'externalInfo.json');
 const LOGS_PATH = path.join(EXEC_DIR, 'logs.txt');
@@ -22,6 +24,8 @@ const BOT_SCRIPT = path.join(app.getAppPath(), 'wwebjs', 'bot.js');
 let mainWindow = null;
 let botProcess = null;
 let statusInterval = null;
+let chromeReady = false;
+let ensureChromePromise = null;
 
 function seedUserData() {
 	if (!IS_PACKAGED) return;
@@ -69,10 +73,35 @@ function emitStatus() {
 	sendToRenderer('bot:status', { running });
 }
 
-function startBot() {
+function ensureChromeReady() {
+	if (chromeReady) return Promise.resolve({ ok: true });
+	if (ensureChromePromise) return ensureChromePromise;
+	ensureChromePromise = ensureChrome({
+		cacheDir: PUPPETEER_CACHE_DIR,
+		onProgress: (p) => sendToRenderer('bot:setupProgress', p),
+	})
+		.then((info) => {
+			chromeReady = true;
+			appendLog(`[setup] chrome ready at ${info.executablePath} (buildId ${info.buildId})`);
+			return { ok: true };
+		})
+		.catch((err) => {
+			appendLog(`[setup] chrome install failed: ${err.message}`);
+			return { ok: false, error: err.message };
+		})
+		.finally(() => {
+			ensureChromePromise = null;
+		});
+	return ensureChromePromise;
+}
+
+async function startBot() {
 	if (botProcess && botProcess.exitCode === null) {
 		return { ok: true, alreadyRunning: true };
 	}
+
+	const ready = await ensureChromeReady();
+	if (!ready.ok) return ready;
 
 	try {
 		botProcess = spawn(process.execPath, [BOT_SCRIPT], {
@@ -81,6 +110,7 @@ function startBot() {
 				...process.env,
 				ELECTRON_RUN_AS_NODE: '1',
 				FACOM_ASSETS_DIR: ASSETS_DIR,
+				PUPPETEER_CACHE_DIR,
 			},
 			windowsHide: true,
 		});
@@ -169,6 +199,7 @@ function registerIpc() {
 	ipcMain.handle('bot:getStatus', () => ({
 		running: !!(botProcess && botProcess.exitCode === null),
 	}));
+	ipcMain.handle('bot:ensureBrowser', () => ensureChromeReady());
 
 	ipcMain.handle('config:getUtilInfo', () =>
 		readJson(UTIL_INFO_PATH, { phoneNumber: '', greetingText: '' })

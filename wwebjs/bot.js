@@ -1,10 +1,12 @@
 const { Client } = require('whatsapp-web.js')
+const puppeteer = require('puppeteer')
 const {tradeMessageWithChatbot,answerToMedia} = require('./MessagesFlow.js')
 const {WppCounter,log,isGroupMsg} = require('./utils.js')
 
 const client = new Client({
     puppeteer: {
         headless: false,
+        executablePath: puppeteer.executablePath(),
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });

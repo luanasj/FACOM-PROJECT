@@ -2666,3 +2666,5 @@ chat options []
   links: []
 }
 2026-04-17T18:40:39.354Z bot exited with code 1
+2026-04-23T21:08:14.296Z [setup] chrome ready at C:\Users\luana.jesus\AppData\Roaming\facom-bot\puppeteer-cache\chrome\win64-147.0.7727.57\chrome-win64\chrome.exe (buildId 147.0.7727.57)
+2026-04-23T21:08:33.984Z bot exited with code 1

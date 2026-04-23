@@ -249,5 +249,73 @@ $('#btn-save-menu').addEventListener('click', async (e) => {
 	else showMessage('menu-msg', res.error || 'Erro ao salvar.', false);
 });
 
+// Browser setup (first-run Chrome download)
+const setupOverlay = $('#setup-overlay');
+const setupBar = $('#setup-bar');
+const setupPercent = $('#setup-percent');
+const setupTitle = $('#setup-title');
+const setupMessage = $('#setup-message');
+const setupIcon = $('#setup-icon');
+const setupRetry = $('#setup-retry');
+
+function showSetupOverlay() {
+	setupOverlay.classList.remove('hidden');
+}
+function hideSetupOverlay() {
+	setupOverlay.classList.add('hidden');
+}
+function setSetupProgress(downloaded, total) {
+	if (!total) {
+		setupPercent.textContent = `${(downloaded / 1024 / 1024).toFixed(1)} MB`;
+		return;
+	}
+	const pct = Math.min(100, Math.round((downloaded / total) * 100));
+	setupBar.style.width = `${pct}%`;
+	setupPercent.textContent = `${pct}% · ${(downloaded / 1024 / 1024).toFixed(1)} / ${(total / 1024 / 1024).toFixed(1)} MB`;
+}
+function setSetupError(errorMessage) {
+	setupTitle.textContent = 'Falha ao preparar navegador';
+	setupMessage.textContent = errorMessage || 'Ocorreu um erro inesperado.';
+	setupIcon.textContent = 'error';
+	setupIcon.classList.remove('text-emerald-600');
+	setupIcon.classList.add('text-rose-600');
+	setupBar.classList.remove('bg-emerald-500');
+	setupBar.classList.add('bg-rose-500');
+	setupRetry.classList.remove('hidden');
+}
+function resetSetupUI() {
+	setupTitle.textContent = 'Preparando navegador…';
+	setupMessage.textContent = 'Baixando o navegador necessário para o bot. Isso acontece apenas na primeira execução.';
+	setupIcon.textContent = 'download';
+	setupIcon.classList.add('text-emerald-600');
+	setupIcon.classList.remove('text-rose-600');
+	setupBar.classList.add('bg-emerald-500');
+	setupBar.classList.remove('bg-rose-500');
+	setupBar.style.width = '0%';
+	setupPercent.textContent = '0%';
+	setupRetry.classList.add('hidden');
+}
+
+window.facom.onSetupProgress(({ downloaded, total }) => setSetupProgress(downloaded, total));
+
+async function runSetup() {
+	resetSetupUI();
+	showSetupOverlay();
+	$('#btn-start').disabled = true;
+	$('#btn-restart').disabled = true;
+	const res = await window.facom.ensureBrowser();
+	if (res && res.ok) {
+		hideSetupOverlay();
+		$('#btn-start').disabled = false;
+		$('#btn-restart').disabled = false;
+	} else {
+		setSetupError(res && res.error);
+	}
+}
+
+setupRetry.addEventListener('click', () => runSetup());
+
+runSetup();
+
 // Initial load
 loadUtilInfo();
