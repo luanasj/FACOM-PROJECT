@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 function loadRevisions() {
 	const candidates = [
@@ -24,7 +25,13 @@ function friendlyError(err) {
 	return err;
 }
 
-async function ensureChrome({ cacheDir, onProgress }) {
+function wipeCorruptFolder(browserFolder) {
+	try {
+		fs.rmSync(browserFolder, { recursive: true, force: true });
+	} catch {}
+}
+
+async function ensureChrome({ cacheDir, onProgress, onExtracting }) {
 	const {
 		Browser,
 		install,
@@ -45,27 +52,57 @@ async function ensureChrome({ cacheDir, onProgress }) {
 		cacheDir,
 	});
 
+	// executablePath is `<cacheDir>/chrome/<platform>-<buildId>/chrome-<platform>/chrome.exe`.
+	// The "browser folder" (win64-<buildId>) is two levels up.
+	const browserFolder = path.dirname(path.dirname(executablePath));
+
 	if (fs.existsSync(executablePath)) {
 		return { executablePath, buildId, alreadyInstalled: true };
 	}
 
+	// Pre-install cleanup: a prior install left the folder but no executable
+	// (extraction was interrupted or never finished). `install()` would otherwise
+	// throw "browser folder exists but the executable is missing" immediately.
+	if (fs.existsSync(browserFolder)) {
+		wipeCorruptFolder(browserFolder);
+	}
+
+	let extractingFired = false;
+	const progressCallback = (downloaded, total) => {
+		if (typeof onProgress === 'function') {
+			onProgress({ downloaded, total });
+		}
+		if (!extractingFired && total > 0 && downloaded >= total && typeof onExtracting === 'function') {
+			extractingFired = true;
+			onExtracting();
+		}
+	};
+
+	const doInstall = () => install({
+		browser: Browser.CHROME,
+		buildId,
+		cacheDir,
+		downloadProgressCallback: progressCallback,
+	});
+
 	try {
-		const installed = await install({
-			browser: Browser.CHROME,
-			buildId,
-			cacheDir,
-			downloadProgressCallback: (downloaded, total) => {
-				if (typeof onProgress === 'function') {
-					onProgress({ downloaded, total });
-				}
-			},
-		});
+		const installed = await doInstall();
 		return {
 			executablePath: installed.executablePath,
 			buildId,
 			alreadyInstalled: false,
 		};
 	} catch (err) {
+		if (err && typeof err.message === 'string' && err.message.includes('exists but the executable')) {
+			wipeCorruptFolder(browserFolder);
+			extractingFired = false;
+			const installed = await doInstall().catch((err2) => { throw friendlyError(err2); });
+			return {
+				executablePath: installed.executablePath,
+				buildId,
+				alreadyInstalled: false,
+			};
+		}
 		throw friendlyError(err);
 	}
 }

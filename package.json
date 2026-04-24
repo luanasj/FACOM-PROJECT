@@ -1,13 +1,14 @@
 {
 	"name": "facom-bot",
-	"version": "2.0.1",
+	"version": "2.0.3",
 	"description": "FACOM-bot desktop control panel",
 	"main": "electron/main.js",
 	"scripts": {
 		"start": "electron .",
-		"pack": "electron-builder --dir",
-		"dist": "electron-builder",
-		"release": "electron-builder --publish always",
+		"bundle-chrome": "node scripts/bundle-chrome.js",
+		"pack": "npm run bundle-chrome && electron-builder --dir",
+		"dist": "npm run bundle-chrome && electron-builder",
+		"release": "npm run bundle-chrome && electron-builder --publish always",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
@@ -41,6 +42,10 @@
 			{
 				"from": "assets",
 				"to": "assets"
+			},
+			{
+				"from": "chrome-cache",
+				"to": "chrome-cache"
 			}
 		],
 		"asarUnpack": [

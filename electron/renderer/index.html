@@ -23,11 +23,15 @@
 			<h3 id="setup-title" class="text-lg font-bold text-slate-800">Preparando navegador…</h3>
 		</div>
 		<p id="setup-message" class="text-sm text-slate-600">Baixando o navegador necessário para o bot. Isso acontece apenas na primeira execução.</p>
-		<div class="space-y-2">
+		<div id="setup-progress-block" class="space-y-2">
 			<div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
 				<div id="setup-bar" class="h-full bg-emerald-500 transition-all" style="width: 0%"></div>
 			</div>
 			<p id="setup-percent" class="text-xs text-slate-500 text-right font-mono">0%</p>
+		</div>
+		<div id="setup-extracting" class="hidden flex items-center space-x-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
+			<svg class="animate-spin h-5 w-5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+			<p class="text-xs text-slate-600 leading-snug">Instalando navegador… isso pode levar vários minutos se o antivírus estiver verificando os arquivos. <strong class="text-slate-800">Não feche o aplicativo.</strong></p>
 		</div>
 		<button id="setup-retry" class="hidden w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-all shadow-sm">
 			Tentar novamente
@@ -68,7 +72,7 @@
 			<div class="mt-auto px-6 py-4">
 				<div class="p-3 bg-slate-200/50 rounded-xl">
 					<p class="text-[10px] font-bold text-slate-400 uppercase">Versão</p>
-					<p class="text-xs text-slate-600 font-medium">v2.0.0</p>
+					<p class="text-xs text-slate-600 font-medium">v2.0.3</p>
 				</div>
 			</div>
 		</nav>
@@ -173,7 +177,7 @@
 			</div>
 
 			<footer class="bg-white border-t border-slate-200 py-4 px-8 text-left text-xs text-slate-400">
-				© 2026 FACOM-bot Control System v2.0.0
+				© 2026 FACOM-bot Control System v2.0.3
 			</footer>
 		</section>
 	</div>

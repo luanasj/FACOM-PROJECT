@@ -257,6 +257,8 @@ const setupTitle = $('#setup-title');
 const setupMessage = $('#setup-message');
 const setupIcon = $('#setup-icon');
 const setupRetry = $('#setup-retry');
+const setupProgressBlock = $('#setup-progress-block');
+const setupExtracting = $('#setup-extracting');
 
 function showSetupOverlay() {
 	setupOverlay.classList.remove('hidden');
@@ -273,6 +275,13 @@ function setSetupProgress(downloaded, total) {
 	setupBar.style.width = `${pct}%`;
 	setupPercent.textContent = `${pct}% · ${(downloaded / 1024 / 1024).toFixed(1)} / ${(total / 1024 / 1024).toFixed(1)} MB`;
 }
+function showExtractingState() {
+	setupTitle.textContent = 'Instalando navegador…';
+	setupMessage.textContent = 'Download concluído. Agora estamos extraindo os arquivos do navegador.';
+	setupIcon.textContent = 'hourglass_top';
+	setupProgressBlock.classList.add('hidden');
+	setupExtracting.classList.remove('hidden');
+}
 function setSetupError(errorMessage) {
 	setupTitle.textContent = 'Falha ao preparar navegador';
 	setupMessage.textContent = errorMessage || 'Ocorreu um erro inesperado.';
@@ -281,6 +290,8 @@ function setSetupError(errorMessage) {
 	setupIcon.classList.add('text-rose-600');
 	setupBar.classList.remove('bg-emerald-500');
 	setupBar.classList.add('bg-rose-500');
+	setupProgressBlock.classList.remove('hidden');
+	setupExtracting.classList.add('hidden');
 	setupRetry.classList.remove('hidden');
 }
 function resetSetupUI() {
@@ -293,22 +304,30 @@ function resetSetupUI() {
 	setupBar.classList.remove('bg-rose-500');
 	setupBar.style.width = '0%';
 	setupPercent.textContent = '0%';
+	setupProgressBlock.classList.remove('hidden');
+	setupExtracting.classList.add('hidden');
 	setupRetry.classList.add('hidden');
 }
 
 window.facom.onSetupProgress(({ downloaded, total }) => setSetupProgress(downloaded, total));
+window.facom.onSetupExtracting(() => showExtractingState());
 
 async function runSetup() {
 	resetSetupUI();
-	showSetupOverlay();
 	$('#btn-start').disabled = true;
 	$('#btn-restart').disabled = true;
+	// Only show the overlay if ensureBrowser takes longer than ~300ms — when
+	// Chrome is bundled with the installer, it returns instantly and an
+	// overlay flash is noise.
+	const showTimer = setTimeout(() => showSetupOverlay(), 300);
 	const res = await window.facom.ensureBrowser();
+	clearTimeout(showTimer);
 	if (res && res.ok) {
 		hideSetupOverlay();
 		$('#btn-start').disabled = false;
 		$('#btn-restart').disabled = false;
 	} else {
+		showSetupOverlay();
 		setSetupError(res && res.error);
 	}
 }

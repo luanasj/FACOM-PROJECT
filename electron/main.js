@@ -14,7 +14,11 @@ const ASSETS_DIR = path.join(USER_ROOT, 'assets');
 const WWEBJS_DIR = path.join(USER_ROOT, 'wwebjs');
 const CACHE_DIR = path.join(WWEBJS_DIR, '.wwebjs_cache');
 const EXEC_DIR = path.join(USER_ROOT, 'exec');
-const PUPPETEER_CACHE_DIR = path.join(app.getPath('userData'), 'puppeteer-cache');
+// Packaged: use Chrome bundled via electron-builder `extraResources`.
+// Dev: fall back to userData so `npm start` can self-download on first run.
+const PUPPETEER_CACHE_DIR = IS_PACKAGED
+	? path.join(process.resourcesPath, 'chrome-cache')
+	: path.join(app.getPath('userData'), 'puppeteer-cache');
 const UTIL_INFO_PATH = path.join(ASSETS_DIR, 'utilInfo.json');
 const EXTERNAL_INFO_PATH = path.join(ASSETS_DIR, 'externalInfo.json');
 const LOGS_PATH = path.join(EXEC_DIR, 'logs.txt');
@@ -79,6 +83,7 @@ function ensureChromeReady() {
 	ensureChromePromise = ensureChrome({
 		cacheDir: PUPPETEER_CACHE_DIR,
 		onProgress: (p) => sendToRenderer('bot:setupProgress', p),
+		onExtracting: () => sendToRenderer('bot:setupExtracting'),
 	})
 		.then((info) => {
 			chromeReady = true;

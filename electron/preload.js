@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld('facom', {
 		ipcRenderer.on('bot:setupProgress', listener);
 		return () => ipcRenderer.removeListener('bot:setupProgress', listener);
 	},
+	onSetupExtracting: (cb) => {
+		const listener = () => cb();
+		ipcRenderer.on('bot:setupExtracting', listener);
+		return () => ipcRenderer.removeListener('bot:setupExtracting', listener);
+	},
 	onStatus: (cb) => {
 		const listener = (_e, payload) => cb(payload);
 		ipcRenderer.on('bot:status', listener);

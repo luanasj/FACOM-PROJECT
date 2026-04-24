@@ -7,3 +7,4 @@ __pycache__/
 .wwebjs_cache/
 .wwebjs_auth/
 dist/
+chrome-cache/
